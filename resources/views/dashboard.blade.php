@@ -30,7 +30,10 @@
 
   <style>
    
-
+   .fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out; /* Smoothly reduce opacity over 0.3 seconds */
+}
 
    .strikethrough {
     text-decoration: line-through;
@@ -1169,24 +1172,31 @@ body {
     </div>
     
     <script>
-    function fadeOutMessage(elementId) {
-        setTimeout(function() {
-            const message = document.getElementById(elementId);
-            if (message) {
+        function fadeOutMessage(elementId, fadeDelay = 2000, fadeDuration = 300) {
+            setTimeout(() => {
+                const message = document.getElementById(elementId);
+        
+                // Check if the element exists
+                if (!message) {
+                    console.error(`Element with ID '${elementId}' not found.`);
+                    return;
+                }
+        
+                // Add the fade-out class
                 message.classList.add('fade-out');
-                setTimeout(function() {
+        
+                // Hide the element after the fade-out duration
+                setTimeout(() => {
                     message.style.display = 'none';
-                }, 300);
-            }
-        }, 2000);
-    }
-    
-    // Apply fade-out to success and error messages
-    fadeOutMessage('success-message');
-    fadeOutMessage('error-message');
-    </script>
-    
-
+                }, fadeDuration);
+            }, fadeDelay);
+        }
+        
+        // Apply fade-out to success and error messages
+        fadeOutMessage('success-message');
+        fadeOutMessage('error-message');
+        </script>
+        
  <!-- For New Task  -->
  @if(!auth()->user()->isAdmin())
     <div class="col-md-12 grid-margin stretch-card">

@@ -20,6 +20,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
+     .fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out; /* Smoothly reduce opacity over 0.3 seconds */
+}
  .skeleton {
         background: #eee;
         background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
@@ -138,33 +142,60 @@
         </div>
     </div>
     <div class="content-loaded">
-    @if (session('success'))
-    <div id="success-message" class="alert alert-success" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0;">
-        {{ session('success') }}
-    </div>
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-<script>
-    setTimeout(function() {
-        const successMessage = document.getElementById('success-message');
-        if (successMessage) {
-            successMessage.style.transition = "opacity 1s ease";
-            successMessage.style.opacity = 0;
-            setTimeout(function() {
-                successMessage.style.display = 'none';
-            }, 1000); // Wait for fade-out to complete
-        }
-    }, 3000); // Display for 3 seconds
-</script>
+        <div class="alert-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+            @if (session('success'))
+            <div id="success-message" class="alert alert-success bg-gradient-success border-0 text-white fade show" role="alert" style="min-width: 300px; box-shadow: 0 2px 15px rgba(0,0,0,0.1);">
+                <div class="d-flex align-items-center">
+                    <i class="ti-check mr-2"></i>
+                    <div>{{ session('success') }}</div>
+                   
+                </div>
+            </div>
+            @endif
+        
+            @if ($errors->any())
+            <div id="error-message" class="alert alert-danger bg-gradient-danger border-0 text-white fade show" role="alert" style="min-width: 300px; box-shadow: 0 2px 15px rgba(0,0,0,0.1);">
+                <div class="d-flex align-items-center">
+                    <i class="ti-alert mr-2"></i>
+                    <div>
+                        <ul class="mb-0 list-unstyled">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+        
+        <script>
+            function fadeOutMessage(elementId, fadeDelay = 2000, fadeDuration = 300) {
+                setTimeout(() => {
+                    const message = document.getElementById(elementId);
+            
+                    // Check if the element exists
+                    if (!message) {
+                        console.error(`Element with ID '${elementId}' not found.`);
+                        return;
+                    }
+            
+                    // Add the fade-out class
+                    message.classList.add('fade-out');
+            
+                    // Hide the element after the fade-out duration
+                    setTimeout(() => {
+                        message.style.display = 'none';
+                    }, fadeDuration);
+                }, fadeDelay);
+            }
+            
+            // Apply fade-out to success and error messages
+            fadeOutMessage('success-message');
+            fadeOutMessage('error-message');
+            </script>
 
-@endif
+
 <div class="container-scroller p-0">
     <div class="page-body-wrapper full-page-wrapper p-0">
 
