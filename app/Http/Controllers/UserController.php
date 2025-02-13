@@ -7,10 +7,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -28,7 +30,7 @@ class UserController extends Controller
          // Validating input with custom messages
          $validatedData = $request->validate([
             'name' => 'required|string|max:255|min:3',
-            'username' => 'required|string|max:255|unique:users,username',
+            'username' => 'required|string|min:3|max:255|unique:users,username',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:8|confirmed',
             'role' => 'nullable|string|in:admin,user',
@@ -38,6 +40,7 @@ class UserController extends Controller
             'name.min' => 'Name must be at least 3 characters.',
             'username.required' => 'Username is required.',
             'username.unique' => 'This username is already taken.',
+            'username.min' => 'username must be at least 3 characters.',
             'email.required' => 'Email is required.',
             'email.email' => 'Enter a valid email address.',
             'email.unique' => 'This email is already registered.',
@@ -61,6 +64,9 @@ class UserController extends Controller
         // Create user
         $user = User::create($validatedData);
 
+         // Authenticate the user immediately after registration
+    Auth::login($user);
+
         // Log successful registration
         Log::info('User registered successfully', ['user_id' => $user->id]);
 
@@ -68,7 +74,7 @@ class UserController extends Controller
         Session::put('user', $user);
         Session::put('user_id', $user->id);
 
-        return redirect()->route('login')->with('success', 'Registration successful! Please log in.');
+        return redirect()->route('dashboard')->with('success', 'Registration successful! Please log in.');
 
     } catch (\Exception $e) {
         // Log the exact error for debugging
@@ -88,6 +94,8 @@ class UserController extends Controller
     public function login(Request $request)
     {
         try {
+
+           
             // Validate the request
             $credentials = $request->validate([
                 'email' => 'required|email',
@@ -115,16 +123,16 @@ class UserController extends Controller
 
                 $user = Auth::user();
 
-
+                
                 // Log successful login
                 \Log::info('User logged in successfully', ['user_id' => Auth::id()]);
 
              
 
                 
-                  return redirect()->back()->with('success', 'Welcome back, ' . $user->name . '!');
+                return redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
 
-
+                 
             }
 
             
@@ -144,7 +152,7 @@ class UserController extends Controller
         }
     }
 
-   /* public function logout(Request $request)
+   public function logout(Request $request)
     {
         try {
             // Clear user session data
@@ -157,7 +165,7 @@ class UserController extends Controller
             // Regenerate CSRF token
             $request->session()->regenerateToken();
 
-            return redirect('/login')
+            return redirect('/')
                 ->with('success', 'You have been successfully logged out.');
 
         } catch (\Exception $e) {
@@ -166,5 +174,110 @@ class UserController extends Controller
             return redirect()->back()
                 ->withErrors(['error' => 'An error occurred during logout.']);
         }
-    }*/
+    }
+
+
+    public function show()
+{
+    try {
+        $user = auth()->user();
+        
+        return view('dashboard', [
+            'user' => $user
+        ]);
+        
+    } catch (\Exception $e) {
+        return redirect()->route('home')->with('error', 'Unable to load dashboard at this moment');
+    }
 }
+
+
+
+    public function update(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255','min:3'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . auth()->id()],
+                'username' => ['required', 'string', 'min:3', 'max:255', 'unique:users,username,' . auth()->id()],
+
+                'image' => ['nullable','image','mimes:jpeg,png,jpg,gif','max:2048']
+            ]);
+    
+            $user = auth()->user();
+            
+             // **Check if user wants to delete existing image**
+        if ($request->delete_image && $user->image) {
+            Storage::disk('public')->delete($user->image);
+            $user->update(['image' => null]);
+        }
+
+            if ($request->hasFile('image')) {
+                // Delete existing image if it exists
+                if ($user->image && Storage::disk('public')->exists($user->image)) {
+                    Storage::disk('public')->delete($user->image);
+                }
+                
+                // Store new image
+                $imagePath = $request->file('image')->store('users', 'public');
+                $validated['image'] = $imagePath;
+            }
+    
+            $user->update($validated);
+    
+            return back()->with('success', 'Profile updated successfully');
+            
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            return back()->with('error', 'An error occurred while updating profile');
+        }
+    }
+
+    public function updatePassword(Request $request)
+{
+    try {
+        // Validate request data
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        // Check if the current password is correct
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', 'Current password is incorrect.')->withInput();
+        }
+
+        // Update the user's password
+        $user->update([
+            'password' => Hash::make($validated['new_password']), // Correct key reference
+        ]);
+
+        return back()->with('success', 'Password changed successfully.');
+
+    } catch (ValidationException $e) {
+        return back()
+            ->withErrors($e->validator)
+            ->withInput();
+            
+    } catch (\Exception $e) {
+        return back()->with('error', 'Something went wrong. Please try again later.');
+    }
+}
+
+
+
+
+public function validateCurrentPassword(Request $request)
+{
+    return response()->json([
+        'valid' => Hash::check($request->input('current_password'), auth()->user()->password)
+    ]);
+}
+
+
+    
+}
+
