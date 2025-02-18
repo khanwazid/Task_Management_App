@@ -4,6 +4,8 @@
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Skydash </title>
   <!-- plugins:css -->
@@ -22,14 +24,163 @@
   <link rel="shortcut icon" href="images/favicon.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 
 
   <style>
-   
+    
+    /* Notes Container */
+.task-notes {
+    background-color: #f8f9fa;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+/* Notes Header */
+.notes-header {
+    position: relative;
+}
+
+.notes-icon {
+    background: rgba(255, 193, 7, 0.1);
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+
+/* Note Counter Badge */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Add Note Button */
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
+    transition: all 0.3s ease;
+}
+
+/* Note Items */
+.note-item {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Note Header */
+.note-header {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+/* Note Action Buttons */
+.note-actions button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.note-actions button:hover {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Empty State */
+.empty-notes {
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    border-radius: 0.75rem;
+    border: 1px dashed #dee2e6;
+}
+
+.empty-icon {
+    opacity: 0.5;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.note-item {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .task-notes {
+        padding: 1rem;
+    }
+    
+    .note-item {
+        margin-bottom: 1rem;
+    }
+}
+
+   .modal {
+    display: none; /* Ensure modal is hidden by default */
+}
+
+.modal.fade.show {
+    display: block; /* Ensure modal is visible when shown */
+}
+.card-header-actions {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.search-box .input-group {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.search-box .form-control:focus {
+    box-shadow: none;
+    border-color: #80bdff;
+}
+
+.form-select {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-select:hover {
+    border-color: #80bdff;
+}
+
+/* Animation for task cards */
+.task-card {
+    transition: all 0.3s ease;
+}
+
+/* Empty state animation */
+.empty-state {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
    .fade-out {
     opacity: 0;
     transition: opacity 0.3s ease-out; /* Smoothly reduce opacity over 0.3 seconds */
@@ -1081,6 +1232,7 @@ body {
   </style>
 </head>
 <body>
+    
     <div class="container-scroller">
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
@@ -1265,6 +1417,41 @@ body {
     <i class="fas fa-bolt text-warning fa-pulse"></i> High Priority
 </h5>
                             </div>
+                          
+                            <div class="filter-section p-3 border-bottom bg-light">
+                                <div class="search-wrapper mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-white">
+                                            <i class="fas fa-search text-primary"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control border-start-0 ps-0 task-search" 
+                                                 placeholder="Search tasks by title or description..."
+                                               data-priority="high"
+                                        >
+                                    </div>
+                                </div>
+                            
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <div class="filter-group">
+                                        <select class="form-select form-select-sm status-filter" data-priority="high">
+                                            <option value="">All Status</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in_progress">In Progress</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <select class="form-select form-select-sm date-filter" data-priority="high">
+                                            <option value="">All Dates</option>
+                                            <option value="today">Due Today</option>
+                                            <option value="tomorrow">Due Tomorrow</option>
+                                            <option value="week">This Week</option>
+                                            <option value="overdue">Overdue</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card-body">
                                 @php
                                 $highPriorityTasks = $tasks->where('priority', 'high');
@@ -1327,8 +1514,78 @@ body {
                                         </div>
                                         
                                     </div>
+
+                                    <div class="task-notes mb-4">
+                                        <!-- Notes Header -->
+                                        <div class="notes-header d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="notes-icon">
+                                                    <i class="fas fa-sticky-note text-warning fa-lg"></i>
+                                                </div>
+                                                <h6 class="mb-0 fw-bold">Task Notes</h6>
+                                                <span class="badge bg-light text-dark rounded-pill">
+                                                    {{ $task->notes->count() }}
+                                                </span>
+                                            </div>
+                                            
+                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                                                    onclick="showAddNoteForm({{ $task->id }})">
+                                                <i class="fas fa-plus-circle"></i>
+                                                <span>Add Note</span>
+                                            </button>
+                                        </div>
                                     
-                                    <!-- Action Buttons -->
+
+                                       
+                                
+                                        <!-- Notes List Container -->
+                                        <div class="notes-list" id="notes-list-{{ $task->id }}">
+                                            @forelse($task->notes as $note)
+                                                <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                                                    <!-- Note Header -->
+                                                    <div class="note-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                                                        <div class="note-meta d-flex align-items-center gap-2">
+                                                            <i class="fas fa-clock text-muted"></i>
+                                                            <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
+                                                        </div>
+                                                        
+
+
+                                                        
+                                                        <!-- Note Actions -->
+                                                        <div class="note-actions d-flex gap-2">
+                                                            <button class="btn btn-light btn-sm rounded-circle" 
+                                                                    onclick="editNote({{ $note->id }})"
+                                                                    title="Edit Note">
+                                                                <i class="fas fa-edit text-primary"></i>
+                                                            </button>
+                                                            <button class="btn btn-light btn-sm rounded-circle" 
+                                                                    onclick="deleteNote({{ $note->id }})"
+                                                                    title="Delete Note">
+                                                                <i class="fas fa-trash text-danger"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Note Content -->
+                                                    <div class="note-content p-3">
+                                                        <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $note->content }}</p>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="empty-notes text-center py-4">
+                                                    <div class="empty-icon mb-3">
+                                                        <i class="fas fa-clipboard-list text-muted fa-2x"></i>
+                                                    </div>
+                                                    <p class="text-muted mb-0">No notes added yet</p>
+                                                    <small class="text-muted">Click the 'Add Note' button to create your first note</small>
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                               <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
                                             <i class="far fa-eye text-info"></i>
@@ -1339,10 +1596,11 @@ body {
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#deleteTaskModal{{ $task->id }}" title="Delete Task">
                                             <i class="far fa-trash-can text-danger"></i>
                                         </button>
+                                        
+
                                     </div>
                                 </div>
-                                
-
+                               
                                 @empty
                                     <p class="text-center text-muted my-3">No high priority tasks</p>
                                 @endforelse
@@ -1359,7 +1617,41 @@ body {
     <i class="fas fa-hourglass-half text-dark fa-spin"></i> Medium Priority
 </h5>              
   </div>
-                            <div class="card-body">
+  <div class="filter-section p-3 border-bottom bg-light">
+    <div class="search-wrapper mb-3">
+        <div class="input-group">
+            <span class="input-group-text border-end-0 bg-white">
+                <i class="fas fa-search text-primary"></i>
+            </span>
+            <input type="text" 
+                   class="form-control border-start-0 ps-0 task-search" 
+                     placeholder="Search tasks by title or description..."
+                   data-priority="medium"
+            >
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <div class="filter-group">
+            <select class="form-select form-select-sm status-filter" data-priority="medium">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <select class="form-select form-select-sm date-filter" data-priority="medium">
+                <option value="">All Dates</option>
+                <option value="today">Due Today</option>
+                <option value="tomorrow">Due Tomorrow</option>
+                <option value="week">This Week</option>
+                <option value="overdue">Overdue</option>
+            </select>
+        </div>
+    </div>
+</div>
+  <div class="card-body">
             
 
                                 @php
@@ -1424,6 +1716,75 @@ body {
                                         </div>
                                         
                                     </div>
+                                   
+                                    <div class="task-notes mb-4">
+                                        <!-- Notes Header -->
+                                        <div class="notes-header d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="notes-icon">
+                                                    <i class="fas fa-sticky-note text-warning fa-lg"></i>
+                                                </div>
+                                                <h6 class="mb-0 fw-bold">Task Notes</h6>
+                                                <span class="badge bg-light text-dark rounded-pill">
+                                                    {{ $task->notes->count() }}
+                                                </span>
+                                            </div>
+                                            
+                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                                                    onclick="showAddNoteForm({{ $task->id }})">
+                                                <i class="fas fa-plus-circle"></i>
+                                                <span>Add Note</span>
+                                            </button>
+                                        </div>
+                                    
+
+                                       
+                                
+                                        <!-- Notes List Container -->
+                                        <div class="notes-list" id="notes-list-{{ $task->id }}">
+                                            @forelse($task->notes as $note)
+                                                <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                                                    <!-- Note Header -->
+                                                    <div class="note-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                                                        <div class="note-meta d-flex align-items-center gap-2">
+                                                            <i class="fas fa-clock text-muted"></i>
+                                                            <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
+                                                        </div>
+                                                        
+
+
+                                                        
+                                                        <!-- Note Actions -->
+                                                        <div class="note-actions d-flex gap-2">
+                                                            <button class="btn btn-light btn-sm rounded-circle" 
+                                                                    onclick="editNote({{ $note->id }})"
+                                                                    title="Edit Note">
+                                                                <i class="fas fa-edit text-primary"></i>
+                                                            </button>
+                                                            <button class="btn btn-light btn-sm rounded-circle" 
+                                                                    onclick="deleteNote({{ $note->id }})"
+                                                                    title="Delete Note">
+                                                                <i class="fas fa-trash text-danger"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Note Content -->
+                                                    <div class="note-content p-3">
+                                                        <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $note->content }}</p>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="empty-notes text-center py-4">
+                                                    <div class="empty-icon mb-3">
+                                                        <i class="fas fa-clipboard-list text-muted fa-2x"></i>
+                                                    </div>
+                                                    <p class="text-muted mb-0">No notes added yet</p>
+                                                    <small class="text-muted">Click the 'Add Note' button to create your first note</small>
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                    </div>
                                     
                                     <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
@@ -1456,6 +1817,40 @@ body {
 </h5>
                             </div>
                            
+                            <div class="filter-section p-3 border-bottom bg-light">
+                                <div class="search-wrapper mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-white">
+                                            <i class="fas fa-search text-primary"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control border-start-0 ps-0 task-search" 
+                                                placeholder="Search tasks by title or description..."
+                                               data-priority="low"
+                                        >
+                                    </div>
+                                </div>
+                            
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <div class="filter-group">
+                                        <select class="form-select form-select-sm status-filter" data-priority="low">
+                                            <option value="">All Status</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in_progress">In Progress</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <select class="form-select form-select-sm date-filter" data-priority="low">
+                                            <option value="">All Dates</option>
+                                            <option value="today">Due Today</option>
+                                            <option value="tomorrow">Due Tomorrow</option>
+                                            <option value="week">This Week</option>
+                                            <option value="overdue">Overdue</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card-body">
                                
                                 @php
@@ -1520,7 +1915,77 @@ body {
                                         </div>
                                         
                                     </div>
+                                  
+                                    <div class="task-notes mb-4">
+                                        <!-- Notes Header -->
+                                        <div class="notes-header d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="notes-icon">
+                                                    <i class="fas fa-sticky-note text-warning fa-lg"></i>
+                                                </div>
+                                                <h6 class="mb-0 fw-bold">Task Notes</h6>
+                                                <span class="badge bg-light text-dark rounded-pill">
+                                                    {{ $task->notes->count() }}
+                                                </span>
+                                            </div>
+                                            
+                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                                                    onclick="showAddNoteForm({{ $task->id }})">
+                                                <i class="fas fa-plus-circle"></i>
+                                                <span>Add Note</span>
+                                            </button>
+                                        </div>
                                     
+
+                                       
+                                
+                                        <!-- Notes List Container -->
+                                        <div class="notes-list" id="notes-list-{{ $task->id }}">
+                                            @forelse($task->notes as $note)
+                                                <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                                                    <!-- Note Header -->
+                                                    <div class="note-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                                                        <div class="note-meta d-flex align-items-center gap-2">
+                                                            <i class="fas fa-clock text-muted"></i>
+                                                            <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
+                                                        </div>
+                                                        
+
+
+                                                        
+                                                        <!-- Note Actions -->
+                                                        <div class="note-actions d-flex gap-2">
+                                                            <button class="btn btn-light btn-sm rounded-circle" 
+                                                                    onclick="editNote({{ $note->id }})"
+                                                                    title="Edit Note">
+                                                                <i class="fas fa-edit text-primary"></i>
+                                                            </button>
+                                                            <button class="btn btn-light btn-sm rounded-circle" 
+                                                                    onclick="deleteNote({{ $note->id }})"
+                                                                    title="Delete Note">
+                                                                <i class="fas fa-trash text-danger"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Note Content -->
+                                                    <div class="note-content p-3">
+                                                        <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $note->content }}</p>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="empty-notes text-center py-4">
+                                                    <div class="empty-icon mb-3">
+                                                        <i class="fas fa-clipboard-list text-muted fa-2x"></i>
+                                                    </div>
+                                                    <p class="text-muted mb-0">No notes added yet</p>
+                                                    <small class="text-muted">Click the 'Add Note' button to create your first note</small>
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                    </div>
+                                    
+
                                     <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
@@ -1557,6 +2022,112 @@ body {
             </div>
         </div>
     </div>
+
+   
+    
+    <!-- Edit Modal For Note -->
+    <div class="modal fade" id="editNoteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <!-- Top Header Section -->
+                <div class="modal-header-custom bg-gradient-blue text-white p-4 text-center">
+                    <h4 class="mb-2">
+                        <i class="ti-pencil me-2"></i>Edit Note
+                    </h4>
+                    <p class="mb-0">Update your note content</p>
+                </div>
+    
+                <!-- Content Section -->
+                <form id="editNoteForm">
+                    <input type="hidden" id="editNoteId" name="note_id">
+                    
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <!-- Note Content -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold text-primary">
+                                        <i class="ti-paragraph me-2"></i>Note Content
+                                    </label>
+                                    <textarea 
+                                        class="form-control" 
+                                        id="editNoteContent" 
+                                        name="content" 
+                                        rows="5" 
+                                        placeholder="Update your note here..."
+                                        required
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="modal-footer border-0 py-3">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                            <i class="ti-close me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-update-note">
+                            <i class="ti-save me-2"></i>Update Note
+                        </button>
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Added Note Modal -->
+    <div class="modal fade" id="addNoteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <!-- Top Header Section -->
+                <div class="modal-header-custom bg-gradient-blue text-white p-4 text-center">
+                    <h4 class="mb-2">
+                        <i class="ti-plus me-2"></i>Add New Note
+                    </h4>
+                    <p class="mb-0">Enter your note details</p>
+                </div>
+    
+                <!-- Content Section -->
+                <form id="addNoteForm" action="{{ route('note.add') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="task_id" id="noteTaskId">
+                    
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label fw-bold text-primary">
+                                        <i class="ti-paragraph me-2"></i>Note Content
+                                    </label>
+                                    <textarea 
+                                        class="form-control" 
+                                        id="noteContent" 
+                                        name="content" 
+                                        rows="5" 
+                                        placeholder="Enter your note here..."
+                                        required
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="modal-footer border-0 py-3">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                            <i class="ti-close me-2"></i>Cancel
+                        </button>
+                       
+                        <button type="button" class="btn btn-primary btn-save-note">
+                            <i class="ti-save me-2"></i>Save Note
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     
     <!-- Create Task Modal -->
    <div class="modal fade" id="createTaskModal" tabindex="-1">
@@ -2224,6 +2795,57 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
+
+
+
+<script>
+    $(document).ready(function() {
+    // Initialize modal with proper event handling
+    $('#viewProfileModal .close, #viewProfileModal button[data-dismiss="modal"]').on('click', function() {
+        $('#viewProfileModal').modal('hide');
+    });
+});
+
+</script>
+
+<script>
+    $(document).ready(function() {
+    // Initialize dropdown with proper event handling
+    $('.nav-profile .dropdown-toggle').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const $dropdownMenu = $(this).siblings('.dropdown-menu');
+        $('.dropdown-menu').not($dropdownMenu).removeClass('show');
+        $dropdownMenu.toggleClass('show');
+    });
+
+    // Handle modal triggers
+    $('.nav-profile .dropdown-item[data-toggle="modal"]').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const $dropdownMenu = $(this).closest('.dropdown-menu');
+        const modalTarget = $(this).data('target');
+        
+        $(modalTarget).modal('show');
+        $dropdownMenu.removeClass('show');
+    });
+
+    // Handle outside clicks
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.nav-profile').length) {
+            $('.nav-profile .dropdown-menu').removeClass('show');
+        }
+    });
+});
+
+</script>
 
 <script>$(document).ready(function() {
     $("#createTaskForm").validate({
@@ -2476,6 +3098,11 @@ body {
         </script>
 
         <script>
+            
+            $('#editProfileModal .close, #editProfileModal button[data-dismiss="modal"]').on('click', function() {
+        $('#editProfileModal').modal('hide');
+    });
+
             $(document).ready(function() {
     $("#editProfileForm").validate({
         rules: {
@@ -2580,6 +3207,9 @@ body {
 
       <script>
 $(document).ready(function() {
+    $('#changePasswordModal .close, #changePasswordModal button[data-dismiss="modal"]').on('click', function() {
+        $('#changePasswordModal').modal('hide');
+    });
     // Setup CSRF token for all AJAX requests
     $.validator.addMethod("validateCurrentPassword", function(value, element) {
             let isValid = false;
@@ -2696,6 +3326,340 @@ function showFullDescription(button) {
     }
 }
 
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize search and filter functionality for each priority section
+    ['high', 'medium', 'low'].forEach(priority => {
+        initializeTaskFilters(priority);
+    });
+});
+
+function initializeTaskFilters(priority) {
+    const container = document.querySelector(`[data-priority="${priority}"]`).closest('.card');
+    const searchInput = container.querySelector('.task-search');
+    const statusFilter = container.querySelector('.status-filter');
+    const dateFilter = container.querySelector('.date-filter');
+    const taskCards = container.querySelectorAll('.task-card');
+
+    // Debounce search function
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterTasks();
+        }, 300);
+    });
+
+    // Add change listeners to filters
+    statusFilter.addEventListener('change', filterTasks);
+    dateFilter.addEventListener('change', filterTasks);
+
+    function filterTasks() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const dateValue = dateFilter.value;
+
+        taskCards.forEach(card => {
+            const title = card.querySelector('.task-title').textContent.toLowerCase();
+            const description = card.querySelector('.task-description').textContent.toLowerCase();
+            const status = card.querySelector('.status-badge').textContent.trim().toLowerCase().replace(' ', '_');
+            const dateText = card.querySelector('.date-badge').textContent.trim();
+            const date = new Date(dateText);
+
+            let showCard = true;
+
+            // Search filter
+            if (searchTerm) {
+                showCard = title.includes(searchTerm) || description.includes(searchTerm);
+            }
+
+            // Status filter
+            if (showCard && statusValue) {
+                showCard = status === statusValue;
+            }
+
+            // Date filter
+            if (showCard && dateValue) {
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                switch (dateValue) {
+                    case 'today':
+                        showCard = isSameDay(date, today);
+                        break;
+                    case 'tomorrow':
+                        showCard = isSameDay(date, tomorrow);
+                        break;
+                    case 'week':
+                        showCard = isThisWeek(date);
+                        break;
+                    case 'overdue':
+                        showCard = date < today;
+                        break;
+                }
+            }
+
+            // Show/hide card with animation
+            if (showCard) {
+                card.style.display = 'block';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            } else {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+
+        // Show empty state if no results
+        const visibleCards = Array.from(taskCards).filter(card => card.style.display !== 'none');
+        const emptyState = container.querySelector('.empty-state') || createEmptyState();
+        
+        if (visibleCards.length === 0) {
+            container.querySelector('.card-body').appendChild(emptyState);
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
+    }
+}
+
+// Helper functions
+function isSameDay(date1, date2) {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
+}
+
+function isThisWeek(date) {
+    const today = new Date();
+    const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+    const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+    return date >= weekStart && date <= weekEnd;
+}
+
+function createEmptyState() {
+    const div = document.createElement('div');
+    div.className = 'empty-state text-center py-4';
+    div.innerHTML = `
+        <i class="fas fa-filter fa-2x text-muted mb-2"></i>
+        <p class="text-muted">No tasks match your filters</p>
+    `;
+    return div;
+}
+</script>
+   
+<script>
+    function deleteNote(noteId) {
+    if (confirm('Are you sure you want to delete this note?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/tasks/notes/${noteId}`;
+
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '_token';
+        tokenInput.value = document.querySelector('meta[name="csrf-token"]').content;
+
+        form.appendChild(methodInput);
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+</script>
+
+
+<script>
+
+    // Function to open the modal
+function showAddNoteForm(taskId) {
+    $('#noteTaskId').val(taskId);
+    $('#addNoteModal').modal('show');
+}
+
+$(document).ready(function() {
+    // Initialize form validation
+    $("#addNoteForm").validate({
+        rules: {
+            content: {
+                required: true,
+                minlength: 5,
+                maxlength: 1000
+            }
+        },
+        messages: {
+            content: {
+                required: "Please enter note content",
+                minlength: "Note content must be at least 5 characters long",
+                maxlength: "Note content cannot exceed 1000 characters"
+            }
+        },
+        errorElement: 'div',
+        errorClass: 'invalid-feedback',
+        highlight: function(element, errorClass, validClass) {
+            $(element).addClass('is-invalid').removeClass('is-valid');
+        },
+        unhighlight: function(element, errorClass, validClass) {
+            $(element).addClass('is-valid').removeClass('is-invalid');
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter(element);
+        }
+    });
+
+    // Handle form submission
+    $('#addNoteForm').on('submit', function(e) {
+    e.preventDefault();
+    if ($(this).valid()) {
+        const form = $(this);
+        
+        // Disable submit button to prevent double submission
+        $('.btn-save-note').prop('disabled', true);
+        
+        // Create and submit a hidden form for traditional submission
+        const hiddenForm = $('<form>', {
+            'method': 'POST',
+            'action': form.attr('action')
+        }).hide();
+        
+        // Add form data
+        const formData = new FormData(this);
+        for (let pair of formData.entries()) {
+            hiddenForm.append($('<input>', {
+                'name': pair[0],
+                'value': pair[1],
+                'type': 'hidden'
+            }));
+        }
+        
+        // Close modal and submit once
+        $('#addNoteModal').modal('hide');
+        $('body').append(hiddenForm);
+        hiddenForm.submit();
+    }
+});
+
+    // Reset form when modal closes
+    $('#addNoteModal').on('hidden.bs.modal', function() {
+        $('#addNoteForm').trigger('reset');
+        $('#addNoteForm').validate().resetForm();
+        $('.is-invalid').removeClass('is-invalid');
+        $('.is-valid').removeClass('is-valid');
+    });
+
+    // Handle save button click
+    $(document).on('click', '.btn-save-note', function() {
+        $('#addNoteForm').submit();
+    });
+});
+
+</script>
+
+
+<script>
+    // Function to open edit modal
+function editNote(noteId) {
+    $.get(`/tasks/notes/${noteId}/edit`, function(data) {
+        $('#editNoteId').val(noteId);
+        $('#editNoteContent').val(data.content);
+        $('#editNoteModal').modal('show');
+    });
+}
+$(document).ready(function() {
+    // Initialize validation for edit form
+    $("#editNoteForm").validate({
+        rules: {
+            content: {
+                required: true,
+                minlength: 5,
+                maxlength: 1000
+            }
+        },
+        messages: {
+            content: {
+                required: "Please enter note content",
+                minlength: "Note content must be at least 5 characters long",
+                maxlength: "Note content cannot exceed 1000 characters"
+            }
+        },
+        errorElement: 'div',
+        errorClass: 'invalid-feedback',
+        highlight: function(element) {
+            $(element).addClass('is-invalid').removeClass('is-valid');
+        },
+        unhighlight: function(element) {
+            $(element).addClass('is-valid').removeClass('is-invalid');
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter(element);
+        }
+    });
+
+    $('#editNoteForm').on('submit', function(e) {
+        e.preventDefault();
+        if ($(this).valid()) {
+            const noteId = $('#editNoteId').val();
+            const content = $('#editNoteContent').val();
+            
+            // Create a new form element
+            const form = $('<form>', {
+                'method': 'POST',
+                'action': `/tasks/notes/${noteId}`
+            }).hide();
+            
+            // Add the necessary form fields
+            form.append($('<input>', {
+                'name': '_token',
+                'value': $('meta[name="csrf-token"]').attr('content'),
+                'type': 'hidden'
+            }));
+            
+            form.append($('<input>', {
+                'name': '_method',
+                'value': 'PUT',
+                'type': 'hidden'
+            }));
+            
+            form.append($('<input>', {
+                'name': 'content',
+                'value': content,
+                'type': 'hidden'
+            }));
+
+            // Reset the original form
+            $('#editNoteForm').trigger('reset'); 
+            $('#editNoteForm').validate().resetForm(); 
+            $('.is-invalid').removeClass('is-invalid');
+            $('.is-valid').removeClass('is-valid');
+
+            // Hide the modal and submit the dynamically created form
+            $('#editNoteModal').modal('hide');
+            $('body').append(form);
+            form.submit();
+        }
+    });
+
+    // Reset form when modal closes
+    $('#editNoteModal').on('hidden.bs.modal', function() {
+        $('#editNoteForm').trigger('reset'); 
+        $('#editNoteForm').validate().resetForm(); 
+        $('.is-invalid').removeClass('is-invalid');
+        $('.is-valid').removeClass('is-valid');
+    });
+
+});
 </script>
 </body>
 

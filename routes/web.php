@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskNoteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/update', [UserController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [UserController::class, 'updatePassword'])->name('password.update');
     Route::post('/validate-current-password', [UserController::class, 'validateCurrentPassword']);
-});
 
-   
+    //Notes Controller
+    Route::post('/tasks/notes', [TaskNoteController::class, 'store'])->name('note.add');
+    Route::get('/tasks/{task}/notes', [TaskNoteController::class, 'getNotes']);
+    Route::delete('/tasks/notes/{note}', [TaskNoteController::class, 'destroy']);
+    Route::get('/tasks/notes/{note}/edit', [TaskNoteController::class, 'edit'])->name('note.edit');
+    Route::put('/tasks/notes/{note}', [TaskNoteController::class, 'update'])->name('note.update');
+    
+});

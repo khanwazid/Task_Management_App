@@ -22,14 +22,14 @@ class AdminSeeder extends Seeder
                 'name' => 'Admin User',
                 'username' => 'admin',
                 'email' => 'admin@example.com', // ✅ Email included in update data
-                'password' => Hash::make('password123'), // Hash password securely
+                'password' => Hash::make('password123'), // Hashing password securely
                 'role' => 'admin',
-                'image' => null, // You can set a default image path if needed
+                'image' => null, // You can also set a default image path if needed !
                 'email_verified_at' => now(),
             ]
         );
 
-        // Show a message in the CMD
+        // Show a good  message in the CMD
         if ($admin->wasRecentlyCreated) {
             $this->command->info('✅ Admin user created successfully! 🎉');
         } elseif ($admin->wasChanged()) {

@@ -23,4 +23,9 @@ class Task extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function notes()
+{
+    return $this->hasMany(TaskNote::class)->orderBy('created_at', 'desc');
+}
+
 }
