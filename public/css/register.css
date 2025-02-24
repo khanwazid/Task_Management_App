@@ -1,0 +1,76 @@
+.fade-out {
+opacity: 0;
+transition: opacity 0.3s ease-out; /* Smoothly reduce opacity over 0.3 seconds */
+}
+
+.custom-file {
+width: 100%;
+}
+
+.custom-file-input {
+height: calc(2.875rem + 2px); /* Match other input fields */
+opacity: 0; /* Hide the default file input */
+position: absolute; /* Position it over the label */
+z-index: 2; /* Ensure it's clickable */
+width: 100%; /* Full width */
+cursor: pointer; /* Show pointer cursor */
+}
+
+.custom-file-label {
+height: calc(2.875rem + 2px); /* Match other input fields */
+line-height: 2.5rem; /* Center text vertically */
+padding: 0 15px; /* Add padding for better alignment */
+font-weight: 450; /* Same as other input fields */
+font-size: 0.895rem; /* Same as other input fields */
+color: #6C7293; /* Same as placeholder color */
+font-family: "Nunito", sans-serif; /* Match form font */
+border: 1px solid #ced4da; /* Match other input fields */
+border-radius: 4px; /* Match other input fields */
+background-color: #fff; /* Match other input fields */
+display: flex;
+align-items: center; /* Center text vertically */
+justify-content: flex-start; /* Align text to the left */
+}
+
+.custom-file-label::after {
+height: calc(2.875rem + 2px); /* Match other input fields */
+line-height: 2.5rem; /* Center text vertically */
+padding: 0 1rem; /* Add padding for better alignment */
+background-color: #4B49AC; /* Custom button color */
+color: #ffffff; /* White text color */
+font-weight: 400; /* Same as other input fields */
+font-size: 0.875rem; /* Same as other input fields */
+content: "Browse"; /* Change the text to "Browse" */
+border-left: 1px solid #ced4da; /* Add a border */
+border-radius: 0 4px 4px 0; /* Match other input fields */
+display: flex;
+align-items: center; /* Center text vertically */
+justify-content: center; /* Center text horizontally */
+}
+
+.form-control.is-valid {
+   border-color: #28a745 !important;
+   padding-right: 2.25rem !important;
+   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") !important;
+   background-repeat: no-repeat !important;
+   background-position: center right calc(0.375em + 0.1875rem) !important;
+   background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+}
+
+.invalid-feedback {
+   display: block !important;
+}
+.custom-file {
+width: 100%;
+}
+
+.custom-file-input {
+height: calc(2.875rem + 2px); /* Adjust to match other input fields */
+}
+
+.custom-file-label {
+height: calc(2.875rem + 2px); /* Match other input fields */
+line-height: 2.5rem; /* Center text vertically */
+padding: 0 15px;
+}
+
