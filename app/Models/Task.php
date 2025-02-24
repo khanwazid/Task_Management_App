@@ -18,6 +18,10 @@ class Task extends Model
         'status',
         'due_date',
     ];
+  
+    
+   
+    
     protected $dates = ['due_date'];
     public function user()
     {
@@ -27,5 +31,10 @@ class Task extends Model
 {
     return $this->hasMany(TaskNote::class)->orderBy('created_at', 'desc');
 }
+public function reports()
+{
+    return $this->hasMany(Report::class);
+}
+
 
 }

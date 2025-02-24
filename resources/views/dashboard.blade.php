@@ -35,6 +35,80 @@
 
 
   <style>
+
+.empty-state-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 1.5rem;
+    margin: 1rem;
+}
+
+.text-gradient {
+    background: linear-gradient(45deg, #2196F3, #00BCD4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.main-icon {
+    transition: transform 0.5s ease;
+}
+
+.empty-state-container:hover .main-icon {
+    transform: scale(1.1);
+}
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.floating-item-1, .floating-item-2, .floating-item-3 {
+    position: absolute;
+    animation: float 3s infinite ease-in-out;
+}
+
+.floating-item-1 { top: -20px; right: 20px; animation-delay: 0s; }
+.floating-item-2 { bottom: 0px; right: -10px; animation-delay: 0.5s; }
+.floating-item-3 { top: 10px; left: -10px; animation-delay: 1s; }
+
+.pulse-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.pulse-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    animation: ripple 1.5s ease-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes ripple {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+}
+
+.features-list .badge {
+    transition: all 0.3s ease;
+}
+
+.features-list .badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
     
     /* Notes Container */
 .task-notes {
@@ -1350,7 +1424,7 @@ body {
         </script>
         
  <!-- For New Task  -->
- @if(!auth()->user()->isAdmin())
+
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
@@ -1361,12 +1435,12 @@ body {
                         <i class="ti-plus"></i> Create New Task
                     </button>
                 </div>
-                @endif
+              
                
 
 
                 <div class="row">
-                    @if(!auth()->user()->isAdmin() && $tasks->isEmpty())
+                    @if($tasks->isEmpty())
                     <div class="col-12">
                         <div class="card shadow-sm">
                             <div class="card-body">
@@ -1408,7 +1482,7 @@ body {
                     </div>
                 @else
                     <!-- High Priority Tasks -->
-                    @if(!auth()->user()->isAdmin())
+                  
                     <div class="col-md-4">
                        
                         <div class="card shadow-sm h-100">
@@ -1585,6 +1659,79 @@ body {
                                     </div>
                                     
                                     
+
+
+
+                                        <!-- Task Reports Section -->
+<div class="task-reports mb-4">
+    <div class="notes-header d-flex justify-content-between align-items-center mb-4 p-4 bg-white bg-opacity-75 backdrop-blur rounded-4 shadow-sm">
+        <div class="d-flex align-items-center gap-4">
+            <div class="notes-icon p-3 bg-warning bg-opacity-10 rounded-circle">
+                <i class="fas fa-chart-line text-warning fa-lg"></i>
+            </div>
+            <div>
+                <h5 class="mb-1 fw-bold d-flex align-items-center gap-3">
+                    Admin Reports
+                    
+                </h5>
+                <p class="text-muted mb-0 d-flex align-items-center gap-2">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    Task progress reports from administration
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Reports List -->
+    <div class="reports-list" id="reports-list-{{ $task->id }}">
+        @forelse($task->reports as $report)
+            <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                <!-- Report Header -->
+                <div class="report-header d-flex justify-content-between align-items-center p-3 border-bottom bg-gradient-light">
+                    <div class="report-meta d-flex align-items-center gap-3">
+                        <div class="date-badge p-2 bg-primary bg-opacity-10 rounded-circle">
+                            <i class="fas fa-user-shield text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Admin Report</h6>
+                            <small class="text-muted">{{ $report->created_at->diffForHumans() }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-badge">
+                        <span class="badge bg-info rounded-pill">
+                            <i class="fas fa-user-tie me-1"></i>
+                            Admin Report
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Report Content -->
+                <div class="note-content p-3">
+                    <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $report->reason }}</p>
+                </div>
+            </div>
+        @empty
+            <div class="empty-notes text-center py-4 bg-light rounded-4">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-clipboard-list text-warning fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-3">No Reports Available</h5>
+            <p class="text-muted mb-4 px-4">
+                No admin reports have been generated for this task yet.<br>
+                Check back later for updates on task progress.
+            </p>
+        </div>
+        @endforelse
+
+
+       
+
+
+    </div>
+</div>
+                               
                                                <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
@@ -1602,212 +1749,343 @@ body {
                                 </div>
                                
                                 @empty
-                                    <p class="text-center text-muted my-3">No high priority tasks</p>
+                                   
+                                 </div> <div class="empty-state-wrapper py-5">
+                                    <div class="empty-state-container text-center">
+                                        <!-- Animated Illustration -->
+                                        <div class="empty-illustration mb-4">
+                                            <div class="illustration-wrapper position-relative">
+                                                <i class="fas fa-clipboard-check text-info fa-4x mb-3 main-icon"></i>
+                                                <div class="floating-elements">
+                                                    <i class="fas fa-check text-success floating-item-1"></i>
+                                                    <i class="fas fa-star text-warning floating-item-2"></i>
+                                                    <i class="fas fa-bell text-danger floating-item-3"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                
+                                        <!-- Content -->
+                                        <div class="empty-content">
+                                            <h4 class="empty-title mb-3 text-gradient">Ready to Organize Your Tasks?</h4>
+                                            <div class="empty-description mb-4">
+                                                <p class="text-muted lead">Start managing your Medium priority tasks</p>
+                                                <div class="features-list mt-3">
+                                                    <span class="badge bg-light text-primary m-1">
+                                                        <i class="fas fa-check-circle me-1"></i>Easy Organization
+                                                    </span>
+                                                    <span class="badge bg-light text-success m-1">
+                                                        <i class="fas fa-clock me-1"></i>Track Progress
+                                                    </span>
+                                                    <span class="badge bg-light text-info m-1">
+                                                        <i class="fas fa-bell me-1"></i>Stay Updated
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Action Button -->
+                                            <button type="button" class="btn btn-primary btn-lg shadow-lg pulse-button" data-toggle="modal" data-target="#createTaskModal">
+                                                <i class="ti-plus me-2"></i>
+                                                Add Your First Task
+                                                <div class="ripple"></div>
+                                            </button>
+                                        </div>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
                     </div>
                 
                     <!-- Medium Priority Tasks -->
-                    <div class="col-md-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header bg-warning text-white">
-                         
-<h5 class="mb-0">
-    <i class="fas fa-hourglass-half text-dark fa-spin"></i> Medium Priority
-</h5>              
-  </div>
-  <div class="filter-section p-3 border-bottom bg-light">
-    <div class="search-wrapper mb-3">
-        <div class="input-group">
-            <span class="input-group-text border-end-0 bg-white">
-                <i class="fas fa-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 ps-0 task-search" 
-                     placeholder="Search tasks by title or description..."
-                   data-priority="medium"
-            >
+                   <div class="col-md-4">
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-hourglass-half text-dark fa-spin"></i> Medium Priority
+            </h5>
         </div>
-    </div>
-
-    <div class="d-flex gap-2 flex-wrap">
-        <div class="filter-group">
-            <select class="form-select form-select-sm status-filter" data-priority="medium">
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-            </select>
+        <div class="filter-section p-3 border-bottom bg-light">
+            <div class="search-wrapper mb-3">
+                <div class="input-group">
+                    <span class="input-group-text border-end-0 bg-white">
+                        <i class="fas fa-search text-primary"></i>
+                    </span>
+                    <input type="text"
+                           class="form-control border-start-0 ps-0 task-search"
+                           placeholder="Search tasks by title or description..."
+                           data-priority="medium">
+                </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <div class="filter-group">
+                    <select class="form-select form-select-sm status-filter" data-priority="medium">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select class="form-select form-select-sm date-filter" data-priority="medium">
+                        <option value="">All Dates</option>
+                        <option value="today">Due Today</option>
+                        <option value="tomorrow">Due Tomorrow</option>
+                        <option value="week">This Week</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="filter-group">
-            <select class="form-select form-select-sm date-filter" data-priority="medium">
-                <option value="">All Dates</option>
-                <option value="today">Due Today</option>
-                <option value="tomorrow">Due Tomorrow</option>
-                <option value="week">This Week</option>
-                <option value="overdue">Overdue</option>
-            </select>
-        </div>
-    </div>
-</div>
-  <div class="card-body">
-            
+        <div class="card-body">
+            <!-- Check if there are no tasks -->
+            @php
+                $highPriorityTasks = $tasks->where('priority', 'medium');
+            @endphp
 
-                                @php
-                                $highPriorityTasks = $tasks->where('priority', 'medium');
-                                $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
-                            @endphp
-                            
-                            @forelse($highPriorityTasks as $index => $task)
-                                <div class="task-card mb-3 p-3 border rounded hover-shadow">
-                                    <div class="serial-number mb-2">
-                                        <span class="badge bg-secondary rounded-pill">
-                                            <i class="fas fa-hashtag me-1"></i>
-                                            {{ $startingNumber + $index + 1 }}
-                                        </span>
-                                    </div>
-                                    <!-- Title Section with Modern Icon -->
-                                    <div class="title-section mb-3">
-                                        <div class="d-flex align-items-start gap-2">
-                                            <div class="icon-wrapper">
-                                        
-                                                <i class="fas fa-clipboard-list text-primary fs-4"></i>
-                                            </div>
-                                            <div class="title-content flex-grow-1">
-                                                 <h6 class="mb-2 task-title fw-bold text-dark {{ $task->status == 'completed' ? 'strikethrough' : '' }}">{{ $task->title }}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Description Section with Modern Icon -->
-                                    <div class="description-section mb-3">
-                                        <div class="d-flex gap-2">
-                                            <div class="icon-wrapper">
-                                                <i class="fas fa-file-text text-secondary fs-5"></i>
-                                            </div>
-                                            <div class="description-content flex-grow-1">
-                                                <p class="task-description text-secondary {{ $task->status == 'completed' ? 'strikethrough' : '' }}">{{ $task->description }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Meta Information -->
-                                    <div class="task-meta d-flex justify-content-between align-items-center mb-3">
-                                        <span class="status-badge badge bg-{{ $task->status == 'completed' ? 'success' : ($task->status == 'in_progress' ? 'warning' : 'danger') }} rounded-pill">
-                                            <i class="fas fa-{{ 
-                                                $task->status == 'completed' ? 'check-circle' : 
-                                                ($task->status == 'in_progress' ? 'clock' : 'pause-circle') 
-                                            }} me-1"></i>
-                                            {{ ucfirst(str_replace('_', ' ', $task->status)) }}
-                                        </span>
-                                        
-                                        <div class="date-badge">
-                                            <i class="fas fa-{{ 
-                                                $task->due_date->isPast() ? 'calendar-xmark' : 
-                                                ($task->due_date->isToday() ? 'calendar-day' : 
-                                                ($task->due_date->isTomorrow() ? 'calendar-check' : 'calendar-alt')) 
-                                            }} text-{{ 
-                                                $task->due_date->isPast() ? 'danger' : 
-                                                ($task->due_date->isToday() ? 'warning' : 
-                                                ($task->due_date->isTomorrow() ? 'info' : 'primary')) 
-                                            }} me-1"></i>
-                                            <span class="text-muted">{{ $task->due_date->format('M d, Y') }}</span>
-                                        </div>
-                                        
-                                    </div>
-                                   
-                                    <div class="task-notes mb-4">
-                                        <!-- Notes Header -->
-                                        <div class="notes-header d-flex justify-content-between align-items-center mb-3">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="notes-icon">
-                                                    <i class="fas fa-sticky-note text-warning fa-lg"></i>
-                                                </div>
-                                                <h6 class="mb-0 fw-bold">Task Notes</h6>
-                                                <span class="badge bg-light text-dark rounded-pill">
-                                                    {{ $task->notes->count() }}
-                                                </span>
-                                            </div>
-                                            
-                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
-                                                    onclick="showAddNoteForm({{ $task->id }})">
-                                                <i class="fas fa-plus-circle"></i>
-                                                <span>Add Note</span>
-                                            </button>
-                                        </div>
-                                    
-
-                                       
-                                
-                                        <!-- Notes List Container -->
-                                        <div class="notes-list" id="notes-list-{{ $task->id }}">
-                                            @forelse($task->notes as $note)
-                                                <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
-                                                    <!-- Note Header -->
-                                                    <div class="note-header d-flex justify-content-between align-items-center p-3 border-bottom">
-                                                        <div class="note-meta d-flex align-items-center gap-2">
-                                                            <i class="fas fa-clock text-muted"></i>
-                                                            <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
-                                                        </div>
-                                                        
-
-
-                                                        
-                                                        <!-- Note Actions -->
-                                                        <div class="note-actions d-flex gap-2">
-                                                            <button class="btn btn-light btn-sm rounded-circle" 
-                                                                    onclick="editNote({{ $note->id }})"
-                                                                    title="Edit Note">
-                                                                <i class="fas fa-edit text-primary"></i>
-                                                            </button>
-                                                            <button class="btn btn-light btn-sm rounded-circle" 
-                                                                    onclick="deleteNote({{ $note->id }})"
-                                                                    title="Delete Note">
-                                                                <i class="fas fa-trash text-danger"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <!-- Note Content -->
-                                                    <div class="note-content p-3">
-                                                        <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $note->content }}</p>
-                                                    </div>
-                                                </div>
-                                            @empty
-                                                <div class="empty-notes text-center py-4">
-                                                    <div class="empty-icon mb-3">
-                                                        <i class="fas fa-clipboard-list text-muted fa-2x"></i>
-                                                    </div>
-                                                    <p class="text-muted mb-0">No notes added yet</p>
-                                                    <small class="text-muted">Click the 'Add Note' button to create your first note</small>
-                                                </div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Action Buttons -->
-                                    <div class="action-buttons d-flex justify-content-end gap-2">
-                                        <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
-                                            <i class="far fa-eye text-info"></i>
-                                        </button>
-                                        <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
-                                            <i class="far fa-pen-to-square text-warning"></i>
-                                        </button>
-                                        <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#deleteTaskModal{{ $task->id }}" title="Delete Task">
-                                            <i class="far fa-trash-can text-danger"></i>
-                                        </button>
-                                    </div>
+            @if($highPriorityTasks->isEmpty())
+                <!-- Empty State Section -->
+                <div class="empty-state-wrapper py-5">
+                    <div class="empty-state-container text-center">
+                        <!-- Animated Illustration -->
+                        <div class="empty-illustration mb-4">
+                            <div class="illustration-wrapper position-relative">
+                                <i class="fas fa-clipboard-check text-info fa-4x mb-3 main-icon"></i>
+                                <div class="floating-elements">
+                                    <i class="fas fa-check text-success floating-item-1"></i>
+                                    <i class="fas fa-star text-warning floating-item-2"></i>
+                                    <i class="fas fa-bell text-danger floating-item-3"></i>
                                 </div>
-                                
-
+                            </div>
+                        </div>
+                        <!-- Content -->
+                        <div class="empty-content">
+                            <h4 class="empty-title mb-3 text-gradient">Ready to Organize Your Tasks?</h4>
+                            <div class="empty-description mb-4">
+                                <p class="text-muted lead">Start managing your Medium priority tasks</p>
+                                <div class="features-list mt-3">
+                                    <span class="badge bg-light text-primary m-1">
+                                        <i class="fas fa-check-circle me-1"></i>Easy Organization
+                                    </span>
+                                    <span class="badge bg-light text-success m-1">
+                                        <i class="fas fa-clock me-1"></i>Track Progress
+                                    </span>
+                                    <span class="badge bg-light text-info m-1">
+                                        <i class="fas fa-bell me-1"></i>Stay Updated
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Action Button -->
+                            <button type="button" class="btn btn-primary btn-lg shadow-lg pulse-button" data-toggle="modal" data-target="#createTaskModal">
+                                <i class="ti-plus me-2"></i>
+                                Add Your First Task
+                                <div class="ripple"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <!-- Task List Section -->
+                @php
+                    $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
+                @endphp
+                @foreach($highPriorityTasks as $index => $task)
+                    <!-- Task Card -->
+                    <div class="task-card mb-3 p-3 border rounded hover-shadow">
+                        <!-- Task Details -->
+                        <div class="serial-number mb-2">
+                            <span class="badge bg-secondary rounded-pill">
+                                <i class="fas fa-hashtag me-1"></i>
+                                {{ $startingNumber + $index + 1 }}
+                            </span>
+                        </div>
+                        <!-- Title Section -->
+                        <div class="title-section mb-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="icon-wrapper">
+                                    <i class="fas fa-clipboard-list text-primary fs-4"></i>
+                                </div>
+                                <div class="title-content flex-grow-1">
+                                    <h6 class="mb-2 task-title fw-bold text-dark {{ $task->status == 'completed' ? 'strikethrough' : '' }}">{{ $task->title }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Description Section -->
+                        <div class="description-section mb-3">
+                            <div class="d-flex gap-2">
+                                <div class="icon-wrapper">
+                                    <i class="fas fa-file-text text-secondary fs-5"></i>
+                                </div>
+                                <div class="description-content flex-grow-1">
+                                    <p class="task-description text-secondary {{ $task->status == 'completed' ? 'strikethrough' : '' }}">{{ $task->description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Meta Information -->
+                        <div class="task-meta d-flex justify-content-between align-items-center mb-3">
+                            <span class="status-badge badge bg-{{ $task->status == 'completed' ? 'success' : ($task->status == 'in_progress' ? 'warning' : 'danger') }} rounded-pill">
+                                <i class="fas fa-{{ 
+                                    $task->status == 'completed' ? 'check-circle' : 
+                                    ($task->status == 'in_progress' ? 'clock' : 'pause-circle') 
+                                }} me-1"></i>
+                                {{ ucfirst(str_replace('_', ' ', $task->status)) }}
+                            </span>
+                            <div class="date-badge">
+                                <i class="fas fa-{{ 
+                                    $task->due_date->isPast() ? 'calendar-xmark' : 
+                                    ($task->due_date->isToday() ? 'calendar-day' : 
+                                    ($task->due_date->isTomorrow() ? 'calendar-check' : 'calendar-alt')) 
+                                }} text-{{ 
+                                    $task->due_date->isPast() ? 'danger' : 
+                                    ($task->due_date->isToday() ? 'warning' : 
+                                    ($task->due_date->isTomorrow() ? 'info' : 'primary')) 
+                                }} me-1"></i>
+                                <span class="text-muted">{{ $task->due_date->format('M d, Y') }}</span>
+                            </div>
+                        </div>
+                        <!-- Task Notes Section -->
+                        <div class="task-notes mb-4">
+                            <div class="notes-header d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="notes-icon">
+                                        <i class="fas fa-sticky-note text-warning fa-lg"></i>
+                                    </div>
+                                    <h6 class="mb-0 fw-bold">Task Notes</h6>
+                                    <span class="badge bg-light text-dark rounded-pill">
+                                        {{ $task->notes->count() }}
+                                    </span>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                                        onclick="showAddNoteForm({{ $task->id }})">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Add Note</span>
+                                </button>
+                            </div>
+                            <!-- Notes List -->
+                            <div class="notes-list" id="notes-list-{{ $task->id }}">
+                                @forelse($task->notes as $note)
+                                    <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                                        <!-- Note Header -->
+                                        <div class="note-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                                            <div class="note-meta d-flex align-items-center gap-2">
+                                                <i class="fas fa-clock text-muted"></i>
+                                                <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
+                                            </div>
+                                            <!-- Note Actions -->
+                                            <div class="note-actions d-flex gap-2">
+                                                <button class="btn btn-light btn-sm rounded-circle" 
+                                                        onclick="editNote({{ $note->id }})"
+                                                        title="Edit Note">
+                                                    <i class="fas fa-edit text-primary"></i>
+                                                </button>
+                                                <button class="btn btn-light btn-sm rounded-circle" 
+                                                        onclick="deleteNote({{ $note->id }})"
+                                                        title="Delete Note">
+                                                    <i class="fas fa-trash text-danger"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- Note Content -->
+                                        <div class="note-content p-3">
+                                            <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $note->content }}</p>
+                                        </div>
+                                    </div>
                                 @empty
-                                    <p class="text-center text-muted my-3">No medium priority tasks</p>
+                                    <div class="empty-notes text-center py-4">
+                                        <div class="empty-icon mb-3">
+                                            <i class="fas fa-clipboard-list text-muted fa-2x"></i>
+                                        </div>
+                                        <p class="text-muted mb-0">No notes added yet</p>
+                                        <small class="text-muted">Click the 'Add Note' button to create your first note</small>
+                                    </div>
                                 @endforelse
                             </div>
                         </div>
+                           <!-- Task Reports Section -->
+<div class="task-reports mb-4">
+    <div class="notes-header d-flex justify-content-between align-items-center mb-4 p-4 bg-white bg-opacity-75 backdrop-blur rounded-4 shadow-sm">
+        <div class="d-flex align-items-center gap-4">
+            <div class="notes-icon p-3 bg-warning bg-opacity-10 rounded-circle">
+                <i class="fas fa-chart-line text-warning fa-lg"></i>
+            </div>
+            <div>
+                <h5 class="mb-1 fw-bold d-flex align-items-center gap-3">
+                    Admin Reports
+                    
+                </h5>
+                <p class="text-muted mb-0 d-flex align-items-center gap-2">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    Task progress reports from administration
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Reports List -->
+    <div class="reports-list" id="reports-list-{{ $task->id }}">
+        @forelse($task->reports as $report)
+            <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                <!-- Report Header -->
+                <div class="report-header d-flex justify-content-between align-items-center p-3 border-bottom bg-gradient-light">
+                    <div class="report-meta d-flex align-items-center gap-3">
+                        <div class="date-badge p-2 bg-primary bg-opacity-10 rounded-circle">
+                            <i class="fas fa-user-shield text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Admin Report</h6>
+                            <small class="text-muted">{{ $report->created_at->diffForHumans() }}</small>
+                        </div>
                     </div>
+                    
+                    <div class="admin-badge">
+                        <span class="badge bg-info rounded-pill">
+                            <i class="fas fa-user-tie me-1"></i>
+                            Admin Report
+                        </span>
+                    </div>
+                </div>
                 
+                <!-- Report Content -->
+                <div class="note-content p-3">
+                    <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $report->reason }}</p>
+                </div>
+            </div>
+        @empty
+            <div class="empty-notes text-center py-4 bg-light rounded-4">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-clipboard-list text-warning fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-3">No Reports Available</h5>
+            <p class="text-muted mb-4 px-4">
+                No admin reports have been generated for this task yet.<br>
+                Check back later for updates on task progress.
+            </p>
+        </div>
+        @endforelse
+
+
+       
+
+
+    </div>
+</div>
+                        <!-- Action Buttons -->
+                        <div class="action-buttons d-flex justify-content-end gap-2">
+                            <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
+                                <i class="far fa-eye text-info"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
+                                <i class="far fa-pen-to-square text-warning"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#deleteTaskModal{{ $task->id }}" title="Delete Task">
+                                <i class="far fa-trash-can text-danger"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+    </div>
+</div>
                     <!-- Low Priority Tasks -->
                     <div class="col-md-4">
                         <div class="card shadow-sm h-100">
@@ -1986,6 +2264,77 @@ body {
                                     </div>
                                     
 
+                                       <!-- Task Reports Section -->
+<div class="task-reports mb-4">
+    <div class="notes-header d-flex justify-content-between align-items-center mb-4 p-4 bg-white bg-opacity-75 backdrop-blur rounded-4 shadow-sm">
+        <div class="d-flex align-items-center gap-4">
+            <div class="notes-icon p-3 bg-warning bg-opacity-10 rounded-circle">
+                <i class="fas fa-chart-line text-warning fa-lg"></i>
+            </div>
+            <div>
+                <h5 class="mb-1 fw-bold d-flex align-items-center gap-3">
+                    Admin Reports
+                    
+                </h5>
+                <p class="text-muted mb-0 d-flex align-items-center gap-2">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    Task progress reports from administration
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Reports List -->
+    <div class="reports-list" id="reports-list-{{ $task->id }}">
+        @forelse($task->reports as $report)
+            <div class="note-item mb-3 bg-white rounded-3 shadow-sm hover-lift">
+                <!-- Report Header -->
+                <div class="report-header d-flex justify-content-between align-items-center p-3 border-bottom bg-gradient-light">
+                    <div class="report-meta d-flex align-items-center gap-3">
+                        <div class="date-badge p-2 bg-primary bg-opacity-10 rounded-circle">
+                            <i class="fas fa-user-shield text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-semibold">Admin Report</h6>
+                            <small class="text-muted">{{ $report->created_at->diffForHumans() }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-badge">
+                        <span class="badge bg-info rounded-pill">
+                            <i class="fas fa-user-tie me-1"></i>
+                            Admin Report
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Report Content -->
+                <div class="note-content p-3">
+                    <p class="mb-0 text-secondary" style="white-space: pre-line;">{{ $report->reason }}</p>
+                </div>
+            </div>
+        @empty
+            <div class="empty-notes text-center py-4 bg-light rounded-4">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-clipboard-list text-warning fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-3">No Reports Available</h5>
+            <p class="text-muted mb-4 px-4">
+                No admin reports have been generated for this task yet.<br>
+                Check back later for updates on task progress.
+            </p>
+        </div>
+        @endforelse
+
+
+       
+
+
+    </div>
+</div>
+
+
                                     <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
@@ -2002,10 +2351,49 @@ body {
                                 
 
                                 @empty
-                                    <p class="text-center text-muted my-3">No low priority tasks</p>
+                            </div> <div class="empty-state-wrapper py-5">
+                                <div class="empty-state-container text-center">
+                                    <!-- Animated Illustration -->
+                                    <div class="empty-illustration mb-4">
+                                        <div class="illustration-wrapper position-relative">
+                                            <i class="fas fa-clipboard-check text-info fa-4x mb-3 main-icon"></i>
+                                            <div class="floating-elements">
+                                                <i class="fas fa-check text-success floating-item-1"></i>
+                                                <i class="fas fa-star text-warning floating-item-2"></i>
+                                                <i class="fas fa-bell text-danger floating-item-3"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                            
+                                    <!-- Content -->
+                                    <div class="empty-content">
+                                        <h4 class="empty-title mb-3 text-gradient">Ready to Organize Your Tasks?</h4>
+                                        <div class="empty-description mb-4">
+                                            <p class="text-muted lead">Start managing your Medium priority tasks</p>
+                                            <div class="features-list mt-3">
+                                                <span class="badge bg-light text-primary m-1">
+                                                    <i class="fas fa-check-circle me-1"></i>Easy Organization
+                                                </span>
+                                                <span class="badge bg-light text-success m-1">
+                                                    <i class="fas fa-clock me-1"></i>Track Progress
+                                                </span>
+                                                <span class="badge bg-light text-info m-1">
+                                                    <i class="fas fa-bell me-1"></i>Stay Updated
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Button -->
+                                        <button type="button" class="btn btn-primary btn-lg shadow-lg pulse-button" data-toggle="modal" data-target="#createTaskModal">
+                                            <i class="ti-plus me-2"></i>
+                                            Add Your First Task
+                                            <div class="ripple"></div>
+                                        </button>
+                                    </div>
+                                </div>
                                 @endforelse
                             </div>
-                            @endif
+                            
                         </div>
                         @endif
                     </div>
@@ -3664,4 +4052,3 @@ $(document).ready(function() {
 </body>
 
 </html>
-
