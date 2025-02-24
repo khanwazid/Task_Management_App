@@ -16,105 +16,11 @@
   <!-- inject:css -->
   <link rel="stylesheet" href="../../css/vertical-layout-light/style.css">
   <!-- endinject -->
+  <link rel="stylesheet" href="css/style.css">
   <link rel="shortcut icon" href="../../images/favicon.png" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <style>
-     .fade-out {
-    opacity: 0;
-    transition: opacity 0.3s ease-out; /* Smoothly reduce opacity over 0.3 seconds */
-}
- .skeleton {
-        background: #eee;
-        background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
-        background-size: 200% 100%;
-        animation: 1.5s shine linear infinite;
-    }
-
-    @keyframes shine {
-        to {
-            background-position-x: -200%;
-        }
-    }
-
-    .skeleton-logo {
-        width: 150px;
-        height: 40px;
-        margin-bottom: 20px;
-    }
-
-    .skeleton-text {
-        height: 20px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-    }
-
-    .skeleton-text.heading {
-        width: 60%;
-    }
-
-    .skeleton-text.subheading {
-        width: 40%;
-    }
-
-    .skeleton-input {
-        height: 50px;
-        margin-bottom: 20px;
-        border-radius: 4px;
-    }
-
-    .skeleton-button {
-        height: 50px;
-        border-radius: 4px;
-    }
-
-    .skeleton-link {
-        height: 20px;
-        width: 30%;
-        margin: 20px auto 0;
-        border-radius: 4px;
-    }
-
-    .content-loaded {
-        display: none;
-    }
-        .form-control.is-valid {
-            border-color: #28a745 !important;
-            padding-right: 2.25rem !important;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") !important;
-            background-repeat: no-repeat !important;
-            background-position: center right calc(0.375em + 0.1875rem) !important;
-            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
-        }
-        
-        .invalid-feedback {
-            display: block !important;
-        }
-        .container-scroller {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-}
-
-.page-body-wrapper {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-}
-
-.content-wrapper {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.row {
-    margin: 0 !important;
-}
-
-
-  </style>
+ 
 
 </head>
 
@@ -281,65 +187,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-  <!-- jQuery Validation Script -->
-  <script>
-  $(document).ready(function() {
-    $("#loginForm").validate({
-        rules: {
-            email: {
-                required: true,
-                email: true,
-                maxlength: 255
-            },
-            password: {
-                required: true,
-                minlength: 8,
-                maxlength: 255
-            }
-        },
-        messages: {
-            email: {
-                required: "Please enter your email address",
-                email: "Please enter a valid email address",
-                maxlength: "Email cannot exceed 255 characters"
-            },
-            password: {
-                required: "Please enter your password",
-                minlength: "Password must be at least 8 characters long",
-                maxlength: "Password cannot exceed 255 characters"
-            }
-        },
-        errorElement: 'div',
-        errorClass: 'invalid-feedback d-block',
-        highlight: function(element) {
-            $(element).addClass('is-invalid').removeClass('is-valid');
-        },
-        unhighlight: function(element) {
-            $(element).removeClass('is-invalid').addClass('is-valid');
-        },
-        errorPlacement: function(error, element) {
-            error.insertAfter(element);
-        }
-    });
-
-    // Force Laravel validation errors to be visible
-    $(".invalid-feedback").addClass('d-block');
-});
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            document.querySelector('.skeleton-loader').style.display = 'none';
-            document.querySelector('.content-loaded').style.display = 'block';
-        }, 1500); // Show skeleton for 1.5 seconds
-    });
-    
-    // Show skeleton when navigating away
-    window.addEventListener('beforeunload', function() {
-        document.querySelector('.skeleton-loader').style.display = 'block';
-        document.querySelector('.content-loaded').style.display = 'none';
-    });
-    </script>
+   <!-- Custom JS -->
+   <script src="js/scripts.js"></script>
+ 
 </body>
 
 </html>

@@ -186,4 +186,17 @@ public function toggleStatus($id)
 }
 
 
+
+public function getTasks()
+{
+    $tasks = Task::with('user')->get();
+    $taskCount = Task::count();
+
+    return response()->json([
+        'tasks' => $tasks,
+        'taskCount' => $taskCount
+    ]);
+}
+
+
 }

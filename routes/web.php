@@ -98,9 +98,9 @@ Route::get('/admin/tasks', [TaskController::class, 'indexs'])->name('admin.tasks
  Route::post('/tasks/{task}/reports', [ReportController::class, 'store'])->name('reports.store');
  Route::put('/reports/{report}', [ReportController::class, 'update'])->name('reports.update');
  Route::get('/tasks/{task}/reports', [ReportController::class, 'getNotes'])->name('reports.gets');
-    Route::delete('/tasks/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
-    Route::get('/reports/{report}/fetch', [ReportController::class, 'fetch'])->name('reports.fetch');
+ Route::delete('/tasks/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+ Route::get('/reports/{report}/fetch', [ReportController::class, 'fetch'])->name('reports.fetch');
+ Route::get('/admin/tasks', [TaskController::class, 'getTasks'])->name('admin.get.tasks');
 
-    //Route::get('/admin/users', [TaskController::class, 'getUsers'])->name('admin.get.users');
-//Route::post('/admin/users/{id}/toggle-status', [TaskController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+    
 });
