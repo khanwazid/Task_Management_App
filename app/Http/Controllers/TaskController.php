@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 
 class TaskController extends Controller
@@ -29,8 +30,16 @@ class TaskController extends Controller
             'description' => 'required|string|max:500',
              'priority'    => 'required|in:low,medium,high', // Added priority validation
             'status'      => 'required|in:pending,in_progress,completed',
-            'due_date'    => 'required|date'
+            'due_date'    => 'required|date',
+             'taskimage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
+
+        if ($request->hasFile('taskimage')) {
+            $image = $request->file('taskimage');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/taskimages', $filename);
+            $validated['taskimage'] = $filename;
+        }
 
         auth()->user()->tasks()->create($validated);
 
@@ -40,6 +49,8 @@ class TaskController extends Controller
     }
 }
 
+
+
 public function update(Request $request, Task $task)
 {
     try {
@@ -48,14 +59,51 @@ public function update(Request $request, Task $task)
             'description' => 'required|string|max:500',
             'priority'    => 'required|in:low,medium,high',
             'status'      => 'required|in:pending,in_progress,completed',
-            'due_date'    => 'required|date'
+            'due_date'    => 'required|date',
+            'taskimage'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $task->update($validated);
+
+        $updateData = [
+            'title'       => $validated['title'],
+            'description' => $validated['description'],
+            'priority'    => $validated['priority'],
+            'status'      => $validated['status'],
+            'due_date'    => $validated['due_date']
+          
+        ];
+
+        if ($request->hasFile('taskimage')) {
+            if ($task->taskimage) {
+                Storage::delete('public/taskimages/' . $task->taskimage);
+            }
+            
+            $image = $request->file('taskimage');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/taskimages', $filename);
+            $updateData['taskimage'] = $filename;
+        }
+
+        $task->update($updateData);
 
         return redirect()->back()->with('success', 'Task updated successfully.');
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Something went wrong! Please try again.');
+    }
+}
+
+
+public function deleteImage(Task $task)
+{
+    try {
+        if ($task->taskimage) {
+            Storage::delete('public/taskimages/' . $task->taskimage);
+            $task->update(['taskimage' => null]);
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false]);
     }
 }
 
@@ -89,11 +137,9 @@ public function indexs()
     }
 
 }
-
 public function updates(Request $request, Task $task)
 {
     try {
-        // Ensuring only admin can update tasks
         if (auth()->user()->role !== 'admin') {
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
@@ -103,20 +149,34 @@ public function updates(Request $request, Task $task)
             'description' => 'required|string|max:500',
             'priority'    => 'required|in:low,medium,high',
             'status'      => 'required|in:pending,in_progress,completed',
-            'due_date'    => 'required|date'
+            'due_date'    => 'required|date',
+            'taskimage'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        // Ensured user_id remains unchanged (it belongs to the original task owner)
-        $task->update([
+        $updateData = [
             'title'       => $validated['title'],
             'description' => $validated['description'],
             'priority'    => $validated['priority'],
             'status'      => $validated['status'],
             'due_date'    => $validated['due_date'],
-            'user_id'     => $task->user_id // Keeping the same user ID
-        ]);
+            'user_id'     => $task->user_id
+        ];
+
+        if ($request->hasFile('taskimage')) {
+            if ($task->taskimage) {
+                Storage::delete('public/taskimages/' . $task->taskimage);
+            }
+            
+            $image = $request->file('taskimage');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/taskimages', $filename);
+            $updateData['taskimage'] = $filename;
+        }
+
+        $task->update($updateData);
 
         return redirect()->back()->with('success', 'Task updated successfully.');
+
     } catch (\Illuminate\Validation\ValidationException $e) {
         return redirect()->back()
             ->withErrors($e->errors())
@@ -198,5 +258,19 @@ public function getTasks()
     ]);
 }
 
+
+public function deleteImages(Task $task)
+{
+    try {
+        if ($task->taskimage) {
+            Storage::delete('public/taskimages/' . $task->taskimage);
+            $task->update(['taskimage' => null]);
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false]);
+    }
+}
 
 }

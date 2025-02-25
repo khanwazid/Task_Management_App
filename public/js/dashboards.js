@@ -37,6 +37,10 @@
 
 
     $(document).ready(function() {
+        $.validator.addMethod("fileSize", function(value, element, param) {
+            return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+        }, "File size must be less than 2MB");
+        
     $("#createTaskForm").validate({
         rules: {
             title: {
@@ -60,6 +64,12 @@
             due_date: {
                 required: true,
                 date: true
+            },
+            taskimage: {
+                required: false, // Optional
+                extension: "jpg|jpeg|png|gif",// Allowed file types
+                fileSize: 2097152 // 2MB
+
             }
         },
         messages: {
@@ -84,6 +94,9 @@
             due_date: {
                 required: "Please select a due date",
                 date: "Please enter a valid date"
+            },
+            taskimage: {
+                extension: "Please upload a valid image file (jpg, jpeg, png, gif)"
             }
         },
         errorElement: 'div',
@@ -105,7 +118,27 @@
     $.validator.addMethod("valueNotEquals", function(value, element, arg) {
         return arg !== value;
     });
+    $('#taskimage').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').removeClass('d-none');
+                $('#imagePreview img').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+        } else {
+            $('#imagePreview').addClass('d-none');
+            $('#imagePreview img').attr('src', '');
+        }
+    });
 
+    // Reset image preview when modal closes
+    $('#createTaskModal').on('hidden.bs.modal', function () {
+        $('#imagePreview').addClass('d-none');
+        $('#imagePreview img').attr('src', '');
+   
+});
     // Reset form when modal closes
     $('#createTaskModal').on('hidden.bs.modal', function () {
         $('#createTaskForm').trigger('reset');
@@ -117,6 +150,10 @@
 
 
     $(document).ready(function() {
+        $.validator.addMethod("fileSize", function(value, element, param) {
+            return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+        }, "File size must be less than 2MB");
+        
     $("form[id^='editTaskForm']").each(function() {
         $(this).validate({
             rules: {
@@ -141,6 +178,12 @@
                 due_date: {
                     required: true,
                     date: true
+                },
+                taskimage: {
+                    required: false, // Optional
+                    extension: "jpg|jpeg|png|gif",// Allowed file types
+                    fileSize: 2097152 // 2MB
+    
                 }
             },
             messages: {
@@ -165,6 +208,9 @@
                 due_date: {
                     required: "Please select a due date",
                     date: "Please enter a valid date"
+                },
+                taskimage: {
+                    extension: "Please upload a valid image file (jpg, jpeg, png, gif)"
                 }
             },
             errorElement: 'div',
@@ -180,8 +226,11 @@
             },
             ignore: []
         });
+        
     });
 
+ 
+    
    
   // Enhanced reset when modal closes
   $('[id^="editTaskModal"]').on('hidden.bs.modal', function () {
@@ -203,6 +252,30 @@
                 $(this).val(originalValue);
             }
         });
+    });
+    $('.delete-image').on('click', function(e) {
+        e.preventDefault();
+        
+        const taskId = $(this).data('task-id');
+        const imageContainer = $(this).closest('.current-image');
+        
+        if (confirm('Are you sure you want to delete this image?')) {
+            $.ajax({
+                url: `/tasks/${taskId}/delete-image`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        imageContainer.remove();
+                    }
+                },
+                error: function() {
+                    alert('Error deleting image. Please try again.');
+                }
+            });
+        }
     });
 
     // Store original values when page loads

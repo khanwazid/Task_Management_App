@@ -17,6 +17,7 @@ class Task extends Model
         'priority',
         'status',
         'due_date',
+        'taskimage',
     ];
   
     

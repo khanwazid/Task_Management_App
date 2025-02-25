@@ -171,7 +171,7 @@
                 </div>  --}}
 
                 <div class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tasksModal">
-                    <i class="fas fa-tasks"></i> All Tasks (<span id="taskCount">{{ $tasks->count() }}</span>)
+                    <i class="fas fa-file-signature"></i> All Tasks (<span id="taskCount">{{ $tasks->count() }}</span>)
                 </div>
                 
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewUsersModal">
@@ -233,6 +233,7 @@
 </h5>
          </div>
        
+         
          <div class="filter-section p-3 border-bottom bg-light">
              <div class="search-wrapper mb-3">
                  <div class="input-group">
@@ -271,7 +272,142 @@
              @php
              $highPriorityTasks = $tasks->where('priority', 'high');
              $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
+
+              // Statistics calculations
+    $totalTasks = $highPriorityTasks->count();
+    $pendingTasks = $highPriorityTasks->where('status', 'pending')->count();
+    $inProgressTasks = $highPriorityTasks->where('status', 'in_progress')->count();
+    $completedTasks = $highPriorityTasks->where('status', 'completed')->count();
+    
+    $dueTodayTasks = $highPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
+    $dueThisWeekTasks = $highPriorityTasks->filter(fn($task) => 
+        $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
+    )->count();
+    $overdueTasks = $highPriorityTasks->filter(fn($task) => 
+        $task->due_date->isPast() && $task->status !== 'completed'
+    )->count();
+
+    // Progress calculations
+    $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
+    $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
          @endphp
+        
+       
+        
+<div class="total-tasks-counter mb-3 text-center">
+    <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="text-white-50">Total Tasks</h2>
+                <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+                
+            </div>
+            <div class="display-4">
+               <i class="fas fa-file-signature"></i> 
+</div>
+        </div>
+    </div>
+</div>
+
+
+<div class="statistics-section p-3 border-bottom">
+    <div class="row g-3">
+        <!-- Status Statistics -->
+        <div class="col-md-6">
+            <div class="stats-card bg-light rounded p-3">
+                <h6 class="mb-3 text-primary">
+                    <i class="fas fa-chart-pie me-2"></i>Status Breakdown
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Pending</span>
+                        <span class="badge bg-danger rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'pending')->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">In Progress</span>
+                        <span class="badge bg-warning rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'in_progress')->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Completed</span>
+                        <span class="badge bg-success rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'completed')->count() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Due Date Statistics -->
+        <div class="col-md-6">
+            <div class="stats-card bg-light rounded p-3">
+                <h6 class="mb-3 text-primary">
+                    <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Due Today</span>
+                        <span class="badge bg-info rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->isToday(); 
+                            })->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Due This Week</span>
+                        <span class="badge bg-primary rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
+                            })->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Overdue</span>
+                        <span class="badge bg-danger rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->isPast() && $task->status !== 'completed'; 
+                            })->count() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="col-12">
+            <div class="progress" style="height: 25px;">
+                @php
+                    $total = $highPriorityTasks->count();
+                    $completed = $highPriorityTasks->where('status', 'completed')->count();
+                    $inProgress = $highPriorityTasks->where('status', 'in_progress')->count();
+                    $pending = $highPriorityTasks->where('status', 'pending')->count();
+                    
+                    $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
+                    $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
+                    $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
+                @endphp
+                
+                <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
+                     title="Completed: {{ $completed }}">
+                    {{ round($completedPercentage) }}%
+                </div>
+                <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
+                     title="In Progress: {{ $inProgress }}">
+                    {{ round($inProgressPercentage) }}%
+                </div>
+                <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
+                     title="Pending: {{ $pending }}">
+                    {{ round($pendingPercentage) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
          
          @forelse($highPriorityTasks as $index => $task)
              <div class="task-card mb-3 p-3 border rounded hover-shadow">
@@ -307,6 +443,27 @@
                          </div>
                      </div>
                  </div>
+                 
+
+<!-- Task Image Section -->
+@if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+<div class="task-image-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-image text-success fs-5"></i>
+        </div>
+        <div class="image-content">
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                 alt="Task Image" class="img-fluid rounded shadow-sm" 
+                 style="max-width: 100px; max-height: 100px;">
+        </div>
+    </div>
+</div>
+@else
+<div class="alert alert-info">
+    <i class="fas fa-exclamation-circle"></i> No image available for this task.
+</div>
+@endif
                  <div class="user-badge d-flex align-items-center gap-1 mb-3">
                     <i class="fas fa-user-edit text-primary"></i>
                     <span class="text-muted small">Created by: {{ $task->user->username }}</span>
@@ -598,7 +755,142 @@ data-priority="medium"
              @php
              $highPriorityTasks = $tasks->where('priority', 'medium');
              $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
+              // Statistics calculations
+    $totalTasks = $highPriorityTasks->count();
+    $pendingTasks = $highPriorityTasks->where('status', 'pending')->count();
+    $inProgressTasks = $highPriorityTasks->where('status', 'in_progress')->count();
+    $completedTasks = $highPriorityTasks->where('status', 'completed')->count();
+    
+    $dueTodayTasks = $highPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
+    $dueThisWeekTasks = $highPriorityTasks->filter(fn($task) => 
+        $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
+    )->count();
+    $overdueTasks = $highPriorityTasks->filter(fn($task) => 
+        $task->due_date->isPast() && $task->status !== 'completed'
+    )->count();
+
+    // Progress calculations
+    $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
+    $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
          @endphp
+        
+         
+        
+<div class="total-tasks-counter mb-3 text-center">
+    <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="text-white-50">Total Tasks</h2>
+                <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+                
+            </div>
+            <div class="display-4">
+                <i class="fas fa-file-signature"></i> 
+            </div>
+        </div>
+    </div>
+</div>
+
+
+      
+<div class="statistics-section p-3 border-bottom">
+    <div class="row g-3">
+        <!-- Status Statistics -->
+        <div class="col-md-6">
+            <div class="stats-card bg-light rounded p-3">
+                <h6 class="mb-3 text-primary">
+                    <i class="fas fa-chart-pie me-2"></i>Status Breakdown
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Pending</span>
+                        <span class="badge bg-danger rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'pending')->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">In Progress</span>
+                        <span class="badge bg-warning rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'in_progress')->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Completed</span>
+                        <span class="badge bg-success rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'completed')->count() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Due Date Statistics -->
+        <div class="col-md-6">
+            <div class="stats-card bg-light rounded p-3">
+                <h6 class="mb-3 text-primary">
+                    <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Due Today</span>
+                        <span class="badge bg-info rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->isToday(); 
+                            })->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Due This Week</span>
+                        <span class="badge bg-primary rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
+                            })->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Overdue</span>
+                        <span class="badge bg-danger rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->isPast() && $task->status !== 'completed'; 
+                            })->count() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="col-12">
+            <div class="progress" style="height: 25px;">
+                @php
+                    $total = $highPriorityTasks->count();
+                    $completed = $highPriorityTasks->where('status', 'completed')->count();
+                    $inProgress = $highPriorityTasks->where('status', 'in_progress')->count();
+                    $pending = $highPriorityTasks->where('status', 'pending')->count();
+                    
+                    $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
+                    $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
+                    $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
+                @endphp
+                
+                <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
+                     title="Completed: {{ $completed }}">
+                    {{ round($completedPercentage) }}%
+                </div>
+                <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
+                     title="In Progress: {{ $inProgress }}">
+                    {{ round($inProgressPercentage) }}%
+                </div>
+                <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
+                     title="Pending: {{ $pending }}">
+                    {{ round($pendingPercentage) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
          
          @forelse($highPriorityTasks as $index => $task)
              <div class="task-card mb-3 p-3 border rounded hover-shadow">
@@ -632,6 +924,27 @@ data-priority="medium"
                          </div>
                      </div>
                  </div>
+                 
+
+<!-- Task Image Section -->
+@if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+<div class="task-image-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-image text-success fs-5"></i>
+        </div>
+        <div class="image-content">
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                 alt="Task Image" class="img-fluid rounded shadow-sm" 
+                 style="max-width: 100px; max-height: 100px;">
+        </div>
+    </div>
+</div>
+@else
+<div class="alert alert-info">
+    <i class="fas fa-exclamation-circle"></i> No image available for this task.
+</div>
+@endif
                  <div class="user-badge d-flex align-items-center gap-1 mb-3">
                     <i class="fas fa-user-edit text-primary"></i>
                     <span class="text-muted small">Created by: {{ $task->user->username }}</span>
@@ -918,8 +1231,141 @@ data-priority="medium"
              @php
              $highPriorityTasks = $tasks->where('priority', 'low');
              $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
+               // Statistics calculations
+    $totalTasks = $highPriorityTasks->count();
+    $pendingTasks = $highPriorityTasks->where('status', 'pending')->count();
+    $inProgressTasks = $highPriorityTasks->where('status', 'in_progress')->count();
+    $completedTasks = $highPriorityTasks->where('status', 'completed')->count();
+    
+    $dueTodayTasks = $highPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
+    $dueThisWeekTasks = $highPriorityTasks->filter(fn($task) => 
+        $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
+    )->count();
+    $overdueTasks = $highPriorityTasks->filter(fn($task) => 
+        $task->due_date->isPast() && $task->status !== 'completed'
+    )->count();
+
+    // Progress calculations
+    $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
+    $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
          @endphp
-         
+        
+        
+<div class="total-tasks-counter mb-3 text-center">
+    <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="text-white-50">Total Tasks</h2>
+                <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+                
+            </div>
+            <div class="display-4">
+                <i class="fas fa-file-signature"></i> 
+            </div>
+        </div>
+    </div>
+</div>
+
+
+       
+<div class="statistics-section p-3 border-bottom">
+    <div class="row g-3">
+        <!-- Status Statistics -->
+        <div class="col-md-6">
+            <div class="stats-card bg-light rounded p-3">
+                <h6 class="mb-3 text-primary">
+                    <i class="fas fa-chart-pie me-2"></i>Status Breakdown
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Pending</span>
+                        <span class="badge bg-danger rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'pending')->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">In Progress</span>
+                        <span class="badge bg-warning rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'in_progress')->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Completed</span>
+                        <span class="badge bg-success rounded-pill">
+                            {{ $highPriorityTasks->where('status', 'completed')->count() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Due Date Statistics -->
+        <div class="col-md-6">
+            <div class="stats-card bg-light rounded p-3">
+                <h6 class="mb-3 text-primary">
+                    <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Due Today</span>
+                        <span class="badge bg-info rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->isToday(); 
+                            })->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Due This Week</span>
+                        <span class="badge bg-primary rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
+                            })->count() }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Overdue</span>
+                        <span class="badge bg-danger rounded-pill">
+                            {{ $highPriorityTasks->filter(function($task) { 
+                                return $task->due_date->isPast() && $task->status !== 'completed'; 
+                            })->count() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="col-12">
+            <div class="progress" style="height: 25px;">
+                @php
+                    $total = $highPriorityTasks->count();
+                    $completed = $highPriorityTasks->where('status', 'completed')->count();
+                    $inProgress = $highPriorityTasks->where('status', 'in_progress')->count();
+                    $pending = $highPriorityTasks->where('status', 'pending')->count();
+                    
+                    $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
+                    $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
+                    $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
+                @endphp
+                
+                <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
+                     title="Completed: {{ $completed }}">
+                    {{ round($completedPercentage) }}%
+                </div>
+                <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
+                     title="In Progress: {{ $inProgress }}">
+                    {{ round($inProgressPercentage) }}%
+                </div>
+                <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
+                     title="Pending: {{ $pending }}">
+                    {{ round($pendingPercentage) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
          @forelse($highPriorityTasks as $index => $task)
              <div class="task-card mb-3 p-3 border rounded hover-shadow">
                  <div class="serial-number mb-2">
@@ -952,6 +1398,27 @@ data-priority="medium"
                         </div>
                     </div>
                 </div>
+                
+
+<!-- Task Image Section -->
+@if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+<div class="task-image-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-image text-success fs-5"></i>
+        </div>
+        <div class="image-content">
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                 alt="Task Image" class="img-fluid rounded shadow-sm" 
+                 style="max-width: 100px; max-height: 100px;">
+        </div>
+    </div>
+</div>
+@else
+<div class="alert alert-info">
+    <i class="fas fa-exclamation-circle"></i> No image available for this task.
+</div>
+@endif
                 <div class="user-badge d-flex align-items-center gap-1 mb-3">
                    <i class="fas fa-user-edit text-primary"></i>
                    <span class="text-muted small">Created by: {{ $task->user->username }}</span>
@@ -1449,6 +1916,21 @@ data-priority="medium"
                                 </div>
                             </div>
     
+                             <!-- Task Image Section -->
+                             <div class="col-12">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="ti-image me-2"></i>Task Image
+                                </label>
+                                <div class="d-flex align-items-center">
+                                    @if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+                                        <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}" 
+                                             alt="Task Image" class="img-fluid rounded shadow-sm" 
+                                             style="max-width: 150px; max-height: 150px;">
+                                    @else
+                                        <p class="text-muted"><i class="ti-alert"></i> No image available for this task.</p>
+                                    @endif
+                                </div>
+                            </div>
                             <!-- Priority, Status, Due Date -->
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -1520,7 +2002,7 @@ data-priority="medium"
                 </div>
     
                 <!-- Content Section -->
-                <form id="editTaskForm{{ $task->id }}" action="{{ route('admin.tasks.update', $task->id) }}" method="POST">
+                <form id="editTaskForm{{ $task->id }}" action="{{ route('admin.tasks.update', $task->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     
@@ -1545,6 +2027,35 @@ data-priority="medium"
                                 </div>
                             </div>
     
+                           
+<div class="col-12 mt-3">
+    <div class="form-group">
+        <label class="form-label fw-bold text-primary">
+            <i class="ti-image me-2"></i>Task Image
+        </label>
+        
+        @if($task->taskimage)
+        <div class="current-image mb-2">
+            <img src="{{ Storage::url('taskimages/' . $task->taskimage) }}" 
+                 alt="Task Image" 
+                 class="img-thumbnail" 
+                 style="max-width: 200px">
+            
+            <button type="button" 
+                    class="btn btn-danger btn-sm delete-image" 
+                    data-task-id="{{ $task->id }}">
+                <i class="ti-trash me-1"></i>Delete Image
+            </button>
+        </div>
+        @endif
+
+        <input type="file" 
+               name="taskimage" 
+               class="form-control" 
+               accept="image/*">
+    </div>
+</div>
+
                             <!-- Priority, Status, Due Date -->
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -1644,6 +2155,23 @@ data-priority="medium"
                                     </div>
                                 </div>
     
+                                  <!-- Task Image Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="ti-image me-2"></i>Task Image
+                                </label>
+                                <div class="d-flex align-items-center">
+                                    @if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+                                        <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}" 
+                                             alt="Task Image" class="img-fluid rounded shadow-sm" 
+                                             style="max-width: 150px; max-height: 150px;">
+                                    @else
+                                        <p class="text-muted"><i class="ti-alert"></i> No image available for this task.</p>
+                                    @endif
+                                </div>
+                            </div>
+                                    
+
                                 <!-- Priority, Status, Due Date -->
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -1762,7 +2290,7 @@ data-priority="medium"
             <!-- Modal Header -->
             <div class="modal-header-custom bg-gradient-blue text-white p-4 text-center">
                 <h4 class="mb-2">
-                    <i class="fas fa-tasks"></i>All Tasks
+                    <i class="fas fa-file-signature"></i> All Tasks
                 </h4>
             </div>
 

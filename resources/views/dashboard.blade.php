@@ -295,6 +295,27 @@
                                         </div>
                                     </div>
                                     
+                                    <!-- Task Image Section -->
+@if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+<div class="task-image-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-image text-success fs-5"></i>
+        </div>
+        <div class="image-content">
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                 alt="Task Image" class="img-fluid rounded shadow-sm" 
+                 style="max-width: 100px; max-height: 100px;">
+        </div>
+    </div>
+</div>
+@else
+<div class="alert alert-info">
+    <i class="fas fa-exclamation-circle"></i> No image available for this task.
+</div>
+@endif
+
+
                                     <!-- Meta Information -->
                                     <div class="task-meta d-flex justify-content-between align-items-center mb-3">
                                         <span class="status-badge badge bg-{{ $task->status == 'completed' ? 'success' : ($task->status == 'in_progress' ? 'warning' : 'danger') }} rounded-pill">
@@ -656,6 +677,28 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Task Image Section -->
+@if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+<div class="task-image-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-image text-success fs-5"></i>
+        </div>
+        <div class="image-content">
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                 alt="Task Image" class="img-fluid rounded shadow-sm" 
+                 style="max-width: 100px; max-height: 100px;">
+        </div>
+    </div>
+</div>
+@else
+<div class="alert alert-info">
+    <i class="fas fa-exclamation-circle"></i> No image available for this task.
+</div>
+@endif
+
+
                         <!-- Meta Information -->
                         <div class="task-meta d-flex justify-content-between align-items-center mb-3">
                             <span class="status-badge badge bg-{{ $task->status == 'completed' ? 'success' : ($task->status == 'in_progress' ? 'warning' : 'danger') }} rounded-pill">
@@ -913,6 +956,31 @@
                                             </div>
                                         </div>
                                     </div>
+
+<!-- Task Image Section -->
+@if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+    <div class="task-image-section mb-3">
+        <div class="d-flex gap-2">
+            <div class="icon-wrapper">
+                <i class="fas fa-image text-success fs-5"></i>
+            </div>
+            <div class="image-content">
+                <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                     alt="Task Image" class="img-fluid rounded shadow-sm" 
+                     style="max-width: 100px; max-height: 100px;">
+            </div>
+        </div>
+    </div>
+@else
+    <div class="alert alert-info">
+        <i class="fas fa-exclamation-circle"></i> No image available for this task.
+    </div>
+@endif
+
+
+
+
+
                                     
                                     <!-- Meta Information -->
                                     <div class="task-meta d-flex justify-content-between align-items-center mb-3">
@@ -1281,7 +1349,7 @@
             </div>
 
             <!-- Content Section -->
-            <form id="createTaskForm" action="{{ route('tasks.store') }}" method="POST">
+            <form id="createTaskForm" action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
                 <div class="modal-body p-4">
@@ -1342,6 +1410,19 @@
                                 <input type="date" name="due_date" class="form-control" required>
                             </div>
                         </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="ti-image me-2"></i>Task Image
+                                </label>
+                                <div class="custom-file-upload">
+                                    <input type="file" name="taskimage" id="taskimage" class="form-control" accept="image/*">
+                                    <div id="imagePreview" class="mt-2 d-none">
+                                        <img src="" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1394,6 +1475,22 @@
                                 </div>
                             </div>
     
+                                 <!-- Task Image Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="ti-image me-2"></i>Task Image
+                                </label>
+                                <div class="d-flex align-items-center">
+                                    @if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+                                        <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}" 
+                                             alt="Task Image" class="img-fluid rounded shadow-sm" 
+                                             style="max-width: 150px; max-height: 150px;">
+                                    @else
+                                        <p class="text-muted"><i class="ti-alert"></i> No image available for this task.</p>
+                                    @endif
+                                </div>
+                            </div>
+                            
                             <!-- Priority, Status, Due Date -->
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -1464,7 +1561,7 @@
                     </div>
         
                     <!-- Content Section -->
-                    <form id="editTaskForm{{ $task->id }}" action="{{ route('tasks.update', $task->id) }}" method="POST">
+                    <form id="editTaskForm{{ $task->id }}" action="{{ route('tasks.update', $task->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         
@@ -1490,6 +1587,36 @@
                                         </div>
                                     </div>
         
+                                   <!-- Add this inside the modal body, after the existing fields -->
+<div class="col-12 mt-3">
+    <div class="form-group">
+        <label class="form-label fw-bold text-primary">
+            <i class="ti-image me-2"></i>Task Image
+        </label>
+        
+        @if($task->taskimage)
+        <div class="current-image mb-2">
+            <img src="{{ Storage::url('taskimages/' . $task->taskimage) }}" 
+                 alt="Task Image" 
+                 class="img-thumbnail" 
+                 style="max-width: 200px">
+            
+            <button type="button" 
+                    class="btn btn-danger btn-sm delete-image" 
+                    data-task-id="{{ $task->id }}">
+                <i class="ti-trash me-1"></i>Delete Image
+            </button>
+        </div>
+        @endif
+
+        <input type="file" 
+               name="taskimage" 
+               class="form-control" 
+               accept="image/*">
+    </div>
+</div>
+
+
                                     <!-- Priority, Status, Due Date -->
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -1585,6 +1712,22 @@
                                         </div>
                                     </div>
         
+                                     <!-- Task Image Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="ti-image me-2"></i>Task Image
+                                </label>
+                                <div class="d-flex align-items-center">
+                                    @if($task->taskimage && Storage::exists('public/taskimages/' . basename($task->taskimage)))
+                                        <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}" 
+                                             alt="Task Image" class="img-fluid rounded shadow-sm" 
+                                             style="max-width: 150px; max-height: 150px;">
+                                    @else
+                                        <p class="text-muted"><i class="ti-alert"></i> No image available for this task.</p>
+                                    @endif
+                                </div>
+                            </div>
+                                    
                                     <!-- Priority, Status, Due Date -->
                                     <div class="col-md-4">
                                         <div class="form-group">

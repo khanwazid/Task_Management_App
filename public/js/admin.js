@@ -2,6 +2,10 @@
     $(this).closest('.modal').modal('hide');
 });
     $(document).ready(function() {
+        $.validator.addMethod("fileSize", function(value, element, param) {
+            return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+        }, "File size must be less than 2MB");
+        
     $("form[id^='editTaskForm']").each(function() {
         $(this).validate({
             rules: {
@@ -24,6 +28,12 @@
                 due_date: {
                     required: true,
                     date: true
+                },
+                taskimage: {
+                    required: false, // Optional
+                    extension: "jpg|jpeg|png|gif",// Allowed file types
+                    fileSize: 2097152 // 2MB
+    
                 }
             },
             messages: {
@@ -46,6 +56,9 @@
                 due_date: {
                     required: "Please select a due date",
                     date: "Please enter a valid date"
+                },
+                taskimage: {
+                    extension: "Please upload a valid image file (jpg, jpeg, png, gif)"
                 }
             },
             errorElement: 'div',
@@ -60,6 +73,31 @@
                 error.insertAfter(element);
             }
         });
+    });
+
+    $('.delete-image').on('click', function(e) {
+        e.preventDefault();
+        
+        const taskId = $(this).data('task-id');
+        const imageContainer = $(this).closest('.current-image');
+        
+        if (confirm('Are you sure you want to delete this image?')) {
+            $.ajax({
+                url: `/admin/tasks/${taskId}/delete-image`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        imageContainer.remove();
+                    }
+                },
+                error: function() {
+                    alert('Error deleting image. Please try again.');
+                }
+            });
+        }
     });
 
     // Reset validation when modal closes

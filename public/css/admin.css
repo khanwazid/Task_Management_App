@@ -1343,3 +1343,18 @@ background-color: #5a6268;
     padding: 8px;
     border-radius: 4px;
 }
+
+.transform-hover {
+    transition: transform 0.3s ease;
+}
+.transform-hover:hover {
+    transform: translateY(-5px);
+}
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}

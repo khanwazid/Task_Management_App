@@ -1332,3 +1332,28 @@ body {
     padding: 8px;
     border-radius: 4px;
 }
+
+.custom-file-upload {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.custom-file-upload:hover {
+    border-color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+#imagePreview {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+#imagePreview img {
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
