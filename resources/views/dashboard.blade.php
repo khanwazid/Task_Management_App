@@ -2086,9 +2086,6 @@
                             <textarea 
                                 name="name" 
                                 class="form-control auto-expand" 
-                                required 
-                                minlength="3" 
-                                maxlength="255"
                                 rows="2"
                                 style="resize: none; overflow: hidden;">{{ auth()->user()->name }}</textarea>
                         </div>
@@ -2100,9 +2097,6 @@
                             <textarea 
                                 name="username" 
                                 class="form-control auto-expand" 
-                                required 
-                                minlength="3" 
-                                maxlength="255"
                                 rows="2"
                                 style="resize: none; overflow: hidden;">{{ auth()->user()->username }}</textarea>
                         </div>
@@ -2114,7 +2108,6 @@
                             <textarea 
                                 name="email" 
                                 class="form-control auto-expand" 
-                                required 
                                 rows="2"
                                 style="resize: none; overflow: hidden;"
                                 data-rule-email="true">{{ auth()->user()->email }}</textarea>

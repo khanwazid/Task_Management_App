@@ -495,9 +495,20 @@
     <i class="fas fa-exclamation-circle"></i> No image available for this task.
 </div>
 @endif
-                 <div class="user-badge d-flex align-items-center gap-1 mb-3">
-                    <i class="fas fa-user-edit text-primary"></i>
-                    <span class="text-muted small">Created by: {{ $task->user->username }}</span>
+                 
+
+                <div class="created-by-section mb-3">
+                    <div class="d-flex gap-2">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-user-edit text-primary fs-5"></i>
+                        </div>
+                        <div class="created-by-content flex-grow-1">
+                            <label class="form-label fw-bold text-primary mb-1">
+                                Created by:
+                            </label>
+                            <p class="task-created-by text-secondary mb-0">{{ $task->user->username }}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="user-status d-flex align-items-center gap-1 mb-3">
@@ -1009,10 +1020,19 @@ data-priority="medium"
     <i class="fas fa-exclamation-circle"></i> No image available for this task.
 </div>
 @endif
-                 <div class="user-badge d-flex align-items-center gap-1 mb-3">
-                    <i class="fas fa-user-edit text-primary"></i>
-                    <span class="text-muted small">Created by: {{ $task->user->username }}</span>
-                </div>
+<div class="created-by-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-user-edit text-primary fs-5"></i>
+        </div>
+        <div class="created-by-content flex-grow-1">
+            <label class="form-label fw-bold text-primary mb-1">
+                Created by:
+            </label>
+            <p class="task-created-by text-secondary mb-0">{{ $task->user->username }}</p>
+        </div>
+    </div>
+</div>
                 <div class="user-status d-flex align-items-center gap-1 mb-3">
                     <i class="fas fa-user-shield text-info"></i>
                     <span class="text-muted small">Status:</span>
@@ -1515,10 +1535,19 @@ data-priority="medium"
     <i class="fas fa-exclamation-circle"></i> No image available for this task.
 </div>
 @endif
-                <div class="user-badge d-flex align-items-center gap-1 mb-3">
-                   <i class="fas fa-user-edit text-primary"></i>
-                   <span class="text-muted small">Created by: {{ $task->user->username }}</span>
-               </div>
+<div class="created-by-section mb-3">
+    <div class="d-flex gap-2">
+        <div class="icon-wrapper">
+            <i class="fas fa-user-edit text-primary fs-5"></i>
+        </div>
+        <div class="created-by-content flex-grow-1">
+            <label class="form-label fw-bold text-primary mb-1">
+                Created by:
+            </label>
+            <p class="task-created-by text-secondary mb-0">{{ $task->user->username }}</p>
+        </div>
+    </div>
+</div>
                <div class="user-status d-flex align-items-center gap-1 mb-3">
                    <i class="fas fa-user-shield text-info"></i>
                    <span class="text-muted small">Status:</span>
@@ -2721,9 +2750,6 @@ data-priority="medium"
                             <textarea 
                                 name="name" 
                                 class="form-control auto-expand" 
-                                required 
-                                minlength="3" 
-                                maxlength="255"
                                 rows="2"
                                 style="resize: none; overflow: hidden;">{{ auth()->user()->name }}</textarea>
                         </div>
@@ -2735,9 +2761,6 @@ data-priority="medium"
                             <textarea 
                                 name="username" 
                                 class="form-control auto-expand" 
-                                required 
-                                minlength="3" 
-                                maxlength="255"
                                 rows="2"
                                 style="resize: none; overflow: hidden;">{{ auth()->user()->username }}</textarea>
                         </div>
@@ -2749,7 +2772,6 @@ data-priority="medium"
                             <textarea 
                                 name="email" 
                                 class="form-control auto-expand" 
-                                required 
                                 rows="2"
                                 style="resize: none; overflow: hidden;"
                                 data-rule-email="true">{{ auth()->user()->email }}</textarea>

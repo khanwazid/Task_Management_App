@@ -1315,6 +1315,21 @@ background-color: #5a6268;
     min-height: 60px;
 }
 
+.created-by-content {
+    position: relative;
+    width: 100%;
+}
+
+.task-created-by {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    min-height: 30px;
+}
+
 /* Notes and reports content */
 .note-content p,
 .report-content p {
@@ -1333,7 +1348,8 @@ background-color: #5a6268;
 
 /* Hover effect to show full text */
 .task-title:hover,
-.task-description:hover {
+.task-description:hover,
+.task-created-by:hover {
     -webkit-line-clamp: unset;
     cursor: pointer;
     position: relative;

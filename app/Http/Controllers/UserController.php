@@ -253,7 +253,7 @@ public function login(Request $request)
     {
         try {
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255','min:3'],
+                'name' => ['required', 'string', 'min:3','max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . auth()->id()],
                 'username' => ['required', 'string', 'min:3', 'max:255', 'unique:users,username,' . auth()->id()],
 
@@ -359,7 +359,7 @@ public function updates(Request $request)
     {
         try {
             $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255','min:3'],
+                'name' => ['required', 'string', 'min:3','max:255'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . auth()->id()],
                 'username' => ['required', 'string', 'min:3', 'max:255', 'unique:users,username,' . auth()->id()],
 
