@@ -1,4 +1,117 @@
-   $(document).on('click', '[data-bs-dismiss="modal"], .modal .close', function() {
+$(document).ready(function() {
+    $.validator.addMethod("fileSize", function(value, element, param) {
+        return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+    }, "File size must be less than 2MB");
+    
+$("#createTaskForm").validate({
+    rules: {
+        title: {
+            required: true,
+            minlength: 3,
+            maxlength: 255
+        },
+        description: {
+            required: true,
+            minlength: 5,
+            maxlength: 500
+        },
+        priority: {
+            required: true,
+            valueNotEquals: ""
+        },
+        status: {
+            required: true,
+            valueNotEquals: ""
+        },
+        due_date: {
+            required: true,
+            date: true
+        },
+        taskimage: {
+            required: false, // Optional
+            extension: "jpg|jpeg|png|gif",// Allowing file types
+            fileSize: 2097152 // 2MB
+
+        }
+    },
+    messages: {
+        title: {
+            required: "Please enter a task title",
+            minlength: "Title must be at least 3 character long",
+            maxlength: "Title cannot exceed 255 characters"
+        },
+        description: {
+            required: "Please enter a task description",
+            minlength: "Description must be at least 5 character long",
+            maxlength: "Description cannot exceed 500 characters"
+        },
+        priority: {
+            required: "Please select a priority level",
+            valueNotEquals: "Please select a priority level"
+        },
+        status: {
+            required: "Please select a status",
+            valueNotEquals: "Please select a status"
+        },
+        due_date: {
+            required: "Please select a due date",
+            date: "Please enter a valid date"
+        },
+        taskimage: {
+            extension: "Please upload a valid image file (jpg, jpeg, png, gif)"
+        }
+    },
+    errorElement: 'div',
+    errorClass: 'invalid-feedback',
+    highlight: function(element, errorClass, validClass) {
+        $(element).addClass('is-invalid').removeClass('is-valid');
+    },
+    unhighlight: function(element, errorClass, validClass) {
+        $(element).addClass('is-valid').removeClass('is-invalid');
+    },
+    errorPlacement: function(error, element) {
+        error.insertAfter(element);
+    },
+    // Add this to properly validate select elements
+    ignore: []
+});
+
+// Custom method for select validation
+$.validator.addMethod("valueNotEquals", function(value, element, arg) {
+    return arg !== value;
+});
+$('#taskimage').on('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#imagePreview').removeClass('d-none');
+            $('#imagePreview img').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(file);
+    } else {
+        $('#imagePreview').addClass('d-none');
+        $('#imagePreview img').attr('src', '');
+    }
+});
+
+// Reset image preview when modal closes
+$('#createTaskModal').on('hidden.bs.modal', function () {
+    $('#imagePreview').addClass('d-none');
+    $('#imagePreview img').attr('src', '');
+
+});
+// Reset form when modal closes
+$('#createTaskModal').on('hidden.bs.modal', function () {
+    $('#createTaskForm').trigger('reset');
+    $('#createTaskForm').validate().resetForm();
+    $('.is-invalid').removeClass('is-invalid');
+    $('.is-valid').removeClass('is-valid');
+});
+});
+
+
+  $(document).on('click', '[data-bs-dismiss="modal"], .modal .close', function() {
     $(this).closest('.modal').modal('hide');
 });
     $(document).ready(function() {
@@ -11,7 +124,7 @@
             rules: {
                 title: {
                     required: true,
-                    minlength: 5,
+                    minlength: 3,
                     maxlength: 255
                 },
                 description: {
@@ -39,7 +152,7 @@
             messages: {
                 title: {
                     required: "Please enter a task title",
-                    minlength: "Title must be at least 5 characters long",
+                    minlength: "Title must be at least 3 characters long",
                     maxlength: "Title cannot exceed 255 characters"
                 },
                 description: {
@@ -393,6 +506,25 @@ $(document).ready(function() {
     });
 
             $(document).ready(function() {
+                // Auto expand textarea based on content
+    function autoExpand(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+
+    // Apply to all textareas with auto-expand class
+    $('.auto-expand').each(function() {
+        autoExpand(this);
+    }).on('input', function() {
+        autoExpand(this);
+    });
+
+    // Add this to your existing modal reset handler
+    $('#editProfileModal').on('hidden.bs.modal', function () {
+        $('.auto-expand').each(function() {
+            this.style.height = 'auto';
+        });
+    });
     $("#editProfileForm").validate({
         rules: {
             name: {
@@ -458,30 +590,52 @@ $(document).ready(function() {
         return this.optional(element) || (element.files[0].size <= param);
     });
 
-    $("#image").change(function() {
+   
+$("#image").change(function() {
     if (this.files && this.files[0]) {
         var reader = new FileReader();
+        
         reader.onload = function(e) {
-            // Remove placeholder if it exists
-            if ($("#imagePreview").hasClass('profile-placeholder')) {
-                $("#imagePreview").replaceWith(
-                    `<img src="${e.target.result}"
-                         id="imagePreview"
-                         class="rounded-circle border shadow"
-                         style="width: 150px; height: 150px; object-fit: cover;"
-                         alt="Profile Photo">`
-                );
-            } else {
-                // Update existing image
-                $("#imagePreview").attr("src", e.target.result);
-            }
+            var imageContainer = $("#imageContainer");
+            
+            // Remove existing preview elements
+            $("#imagePreview, #defaultPreview").remove();
+            
+            // Create new image preview
+            var newImage = $('<img>', {
+                id: 'imagePreview',
+                src: e.target.result,
+                class: 'rounded-circle border shadow',
+                style: 'width: 150px; height: 150px; object-fit: cover;',
+                alt: 'Profile Photo'
+            });
+            
+            // Insert the new image before the label
+            imageContainer.find('label').before(newImage);
         };
+        
         reader.readAsDataURL(this.files[0]);
     }
 });
 
-    // Store original image source
-    var originalImageSrc = $("#imagePreview").attr("src");
+// Handle image deletion
+$(document).on('click', '.delete-profile-image', function() {
+    $("#delete_image").val(1);
+    $("#imagePreview").remove();
+    
+    // Show default preview
+    var defaultPreview = $('<div>', {
+        id: 'defaultPreview',
+        class: 'profile-placeholder rounded-circle border shadow d-flex align-items-center justify-content-center',
+        style: 'width: 150px; height: 150px;'
+    }).append('<i class="fas fa-user-circle"></i>');
+    
+    $("#imageContainer").find('label').before(defaultPreview);
+    $(this).parent().remove();
+});
+
+// Store original image source
+var originalImageSrc = $("#imagePreview").attr("src");
 
     // Reset form when modal closes
     $('#editProfileModal').on('hidden.bs.modal', function () {
@@ -600,14 +754,7 @@ function showFullDescription(button) {
 }
 
 
-    function deleteProfileImage() {
-    if (confirm('Are you sure you want to delete your profile picture?')) {
-        document.getElementById('delete_image').value = '1';
-        document.getElementById('imagePreview').src = '';
-        document.getElementById('imagePreview').innerHTML = '<i class="fas fa-user-circle"></i>';
-        document.getElementById('imagePreview').className = 'profile-placeholder rounded-circle border shadow d-flex align-items-center justify-content-center';
-    }
-}
+
 
  function deleteNote(noteId) {
     if (confirm('Are you sure you want to delete this note?')) {
@@ -809,105 +956,7 @@ $(document).ready(function() {
 
 });
 
-    $(document).ready(function() {
-    $("form[id^='editTaskForm']").each(function() {
-        $(this).validate({
-            rules: {
-                title: {
-                    required: true,
-                    minlength: 5,
-                    maxlength: 255
-                },
-                description: {
-                    required: true,
-                    minlength: 5,
-                    maxlength: 500
-                },
-                priority: {
-                    required: true,
-                    valueNotEquals: ""
-                },
-                status: {
-                    required: true,
-                    valueNotEquals: ""
-                },
-                due_date: {
-                    required: true,
-                    date: true
-                }
-            },
-            messages: {
-                title: {
-                    required: "Please enter a task title",
-                    minlength: "Title must be at least 5 character long",
-                    maxlength: "Title cannot exceed 255 characters"
-                },
-                description: {
-                    required: "Please enter a task description",
-                    minlength: "Description must be at least 5 character long",
-                    maxlength: "Description cannot exceed 500 characters"
-                },
-                priority: {
-                    required: "Please select a priority level",
-                    valueNotEquals: "Please select a priority level"
-                },
-                status: {
-                    required: "Please select a status",
-                    valueNotEquals: "Please select a status"
-                },
-                due_date: {
-                    required: "Please select a due date",
-                    date: "Please enter a valid date"
-                }
-            },
-            errorElement: 'div',
-            errorClass: 'invalid-feedback',
-            highlight: function(element, errorClass, validClass) {
-                $(element).addClass('is-invalid').removeClass('is-valid');
-            },
-            unhighlight: function(element, errorClass, validClass) {
-                $(element).addClass('is-valid').removeClass('is-invalid');
-            },
-            errorPlacement: function(error, element) {
-                error.insertAfter(element);
-            },
-            ignore: []
-        });
-    });
-
-   
-  // Enhanced reset when modal closes
-  $('[id^="editTaskModal"]').on('hidden.bs.modal', function () {
-        let formId = $(this).find('form').attr('id');
-        let form = $('#' + formId);
-        
-        // Reset the validation state
-        form.validate().resetForm();
-        $('.is-invalid').removeClass('is-invalid');
-        $('.is-valid').removeClass('is-valid');
-        
-        // Reset form to original values
-        form[0].reset();
-        
-        // Restore original values from data attributes
-        form.find('input, textarea, select').each(function() {
-            let originalValue = $(this).data('original-value');
-            if (originalValue !== undefined) {
-                $(this).val(originalValue);
-            }
-        });
-    });
-
-    // Store original values when page loads
-    $("form[id^='editTaskForm']").each(function() {
-        $(this).find('input, textarea, select').each(function() {
-            $(this).data('original-value', $(this).val());
-        });
-    });
-});
-
-
-        function deleteProfileImage() {
+function deleteProfileImage() {
         if (confirm('Are you sure you want to delete your profile picture?')) {
             document.getElementById('delete_image').value = '1';
             document.getElementById('imagePreview').src = '';
@@ -1041,5 +1090,32 @@ $(document).ready(function() {
         return div;
     }
     
+   
+    $(document).ready(function() {
+        // Handle modal focus management
+        $('.modal').on('shown.bs.modal', function() {
+            $(this).find('[autofocus]').focus();
+        });
     
+        // Prevent flickering
+        $('.modal').on('show.bs.modal', function() {
+            $(this).removeAttr('aria-hidden');
+        });
+    });
 
+    $(document).ready(function() {
+        function autoExpandTextarea() {
+            $('.custom-view-textarea').each(function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        }
+    
+        // Run on modal show
+        $('#viewProfileModal').on('shown.bs.modal', function() {
+            autoExpandTextarea();
+        });
+    });
+
+
+   

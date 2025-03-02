@@ -217,11 +217,13 @@
                     <div class="col-md-4">
                        
                         <div class="card shadow-sm h-100">
+                            
                             <div class="card-header bg-danger text-white">
                        <h5 class="mb-0">
     <i class="fas fa-bolt text-warning fa-pulse"></i> High Priority
 </h5>
                             </div>
+                            
                           
                             <div class="filter-section p-3 border-bottom bg-light">
                                 <div class="search-wrapper mb-3">
@@ -232,8 +234,8 @@
                                         <input type="text" 
                                                class="form-control border-start-0 ps-0 task-search" 
                                                  placeholder="Search tasks by title or description..."
-                                               data-priority="high"
-                                        >
+                                               data-priority="high">
+                                        
                                     </div>
                                 </div>
                             
@@ -271,6 +273,32 @@
                                             {{ $startingNumber + $index + 1 }}
                                         </span>
                                     </div>
+                                    
+                                    <div class="task-timeline mb-3">
+                                        <div class="timeline-item d-flex align-items-center gap-3">
+                                            <div class="timeline-icon bg-success rounded-circle p-2">
+                                                <i class="fas fa-clock text-white"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <p class="mb-0 small">Created: {{ $task->created_at->format('M d, Y h:i A') }}</p>
+                                                <p class="mb-0 small">Updated: {{ $task->updated_at->format('M d, Y h:i A') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="task-progress mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-muted small">Task Completion</span>
+                                            <span class="badge bg-success">{{ $task->getProgressPercentage() }}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                 role="progressbar" 
+                                                 style="width: {{ $task->getProgressPercentage() }}%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                                                       
                                     <!-- Title Section with Modern Icon -->
                                     <div class="title-section mb-3">
                                         <div class="d-flex align-items-start gap-2">
@@ -304,6 +332,7 @@
         </div>
         <div class="image-content">
             <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+             loading="lazy" 
                  alt="Task Image" class="img-fluid rounded shadow-sm" 
                  style="max-width: 100px; max-height: 100px;">
         </div>
@@ -314,6 +343,7 @@
     <i class="fas fa-exclamation-circle"></i> No image available for this task.
 </div>
 @endif
+
 
 
                                     <!-- Meta Information -->
@@ -492,9 +522,13 @@
                                
                                                <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
-                                        <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
-                                            <i class="far fa-eye text-info"></i>
-                                        </button>
+                                        <button type="button" 
+                                             class="btn btn-light btn-sm rounded-circle" 
+                                            data-toggle="modal" 
+                                              data-target="#viewTaskModal{{ $task->id }}" 
+                                             aria-label="View task details" title="View Details">
+                                            <i class="far fa-eye text-info" aria-hidden="true"></i>
+                                            </button>
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
                                             <i class="far fa-pen-to-square text-warning"></i>
                                         </button>
@@ -655,6 +689,31 @@
                                 {{ $startingNumber + $index + 1 }}
                             </span>
                         </div>
+                        <div class="task-timeline mb-3">
+                            <div class="timeline-item d-flex align-items-center gap-3">
+                                <div class="timeline-icon bg-success rounded-circle p-2">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <p class="mb-0 small">Created: {{ $task->created_at->format('M d, Y h:i A') }}</p>
+                                    <p class="mb-0 small">Updated: {{ $task->updated_at->format('M d, Y h:i A') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-progress mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">Task Completion</span>
+                                <span class="badge bg-success">{{ $task->getProgressPercentage() }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: {{ $task->getProgressPercentage() }}%">
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Title Section -->
                         <div class="title-section mb-3">
                             <div class="d-flex align-items-start gap-2">
@@ -687,9 +746,11 @@
         </div>
         <div class="image-content">
             <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+            loading="lazy" 
                  alt="Task Image" class="img-fluid rounded shadow-sm" 
                  style="max-width: 100px; max-height: 100px;">
         </div>
+
     </div>
 </div>
 @else
@@ -858,9 +919,14 @@
 </div>
                         <!-- Action Buttons -->
                         <div class="action-buttons d-flex justify-content-end gap-2">
-                            <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
-                                <i class="far fa-eye text-info"></i>
-                            </button>
+                           
+                            <button type="button" 
+                            class="btn btn-light btn-sm rounded-circle" 
+                           data-toggle="modal" 
+                             data-target="#viewTaskModal{{ $task->id }}" 
+                            aria-label="View task details" title="View Details">
+                           <i class="far fa-eye text-info" aria-hidden="true"></i>
+                           </button>
                             <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
                                 <i class="far fa-pen-to-square text-warning"></i>
                             </button>
@@ -881,8 +947,9 @@
                               <h5 class="mb-0">
     <i class="fas fa-clock text-secondary fa-spin"></i> Low Priority
 </h5>
-                            </div>
-                           
+</div>
+                            
+
                             <div class="filter-section p-3 border-bottom bg-light">
                                 <div class="search-wrapper mb-3">
                                     <div class="input-group">
@@ -933,6 +1000,33 @@
                                         </span>
                                     </div>
 
+                                    <div class="task-timeline mb-3">
+                                        <div class="timeline-item d-flex align-items-center gap-3">
+                                            <div class="timeline-icon bg-success rounded-circle p-2">
+                                                <i class="fas fa-clock text-white"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <p class="mb-0 small">Created: {{ $task->created_at->format('M d, Y h:i A') }}</p>
+                                                <p class="mb-0 small">Updated: {{ $task->updated_at->format('M d, Y h:i A') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="task-progress mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-muted small">Task Completion</span>
+                                            <span class="badge bg-success">{{ $task->getProgressPercentage() }}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                 role="progressbar" 
+                                                 style="width: {{ $task->getProgressPercentage() }}%">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                   
+
                                     <!-- Title Section with Modern Icon -->
                                     <div class="title-section mb-3">
                                         <div class="d-flex align-items-start gap-2">
@@ -966,6 +1060,7 @@
             </div>
             <div class="image-content">
                 <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}"
+                loading="lazy" 
                      alt="Task Image" class="img-fluid rounded shadow-sm" 
                      style="max-width: 100px; max-height: 100px;">
             </div>
@@ -1006,7 +1101,9 @@
                                         </div>
                                         
                                     </div>
-                                  
+                                
+                                   
+
                                     <div class="task-notes mb-4">
                                         <!-- Notes Header -->
                                         <div class="notes-header d-flex justify-content-between align-items-center mb-3">
@@ -1156,9 +1253,13 @@
 
                                     <!-- Action Buttons -->
                                     <div class="action-buttons d-flex justify-content-end gap-2">
-                                        <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#viewTaskModal{{ $task->id }}" title="View Details">
-                                            <i class="far fa-eye text-info"></i>
-                                        </button>
+                                        <button type="button" 
+                                        class="btn btn-light btn-sm rounded-circle" 
+                                       data-toggle="modal" 
+                                         data-target="#viewTaskModal{{ $task->id }}" 
+                                        aria-label="View task details" title="View Details">
+                                       <i class="far fa-eye text-info" aria-hidden="true"></i>
+                                       </button>
                                         <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
                                             <i class="far fa-pen-to-square text-warning"></i>
                                         </button>
@@ -1337,16 +1438,16 @@
     
     
     <!-- Create Task Modal -->
-   <div class="modal fade" id="createTaskModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <!-- Top Header Section -->
-            <div class="modal-header-custom bg-gradient-blue text-white p-4 text-center">
-                <h4 class="mb-2">
-                    <i class="ti-plus me-2"></i>Create New Task
-                </h4>
-                <p class="mb-0">Enter your task details and preferences</p>
-            </div>
+    <div class="modal fade" id="createTaskModal" tabindex="-1" role="dialog" aria-labelledby="createTaskModalLabel">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header-custom bg-gradient-blue text-white p-4 text-center">
+                    <h4 class="mb-2" id="createTaskModalLabel">
+                        <i class="ti-plus me-2"></i>Create New Task
+                    </h4>
+                    <p class="mb-0">Enter your task details and preferences</p>
+                </div>
 
             <!-- Content Section -->
             <form id="createTaskForm" action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data">
@@ -1426,6 +1527,32 @@
                     </div>
                 </div>
 
+                {{--   <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="ti-image me-2"></i>Task Image
+                                </label>
+                                <div class="modern-upload-container">
+                                    <div class="upload-area" id="uploadArea">
+                                        <input type="file" name="taskimage" id="taskimage" class="file-input" accept="image/*" hidden>
+                                        <div class="upload-content text-center">
+                                            <i class="ti-cloud-up display-4 mb-3"></i>
+                                            <h5 class="upload-title mb-2">Drag & Drop your image here</h5>
+                                            <p class="upload-subtitle mb-3">or</p>
+                                            <button type="button" class="btn btn-outline-primary btn-upload" onclick="document.getElementById('taskimage').click()">
+                                                <i class="ti-image me-2"></i>Browse Image
+                                            </button>
+                                        </div>
+                                        <div id="imagePreview" class="preview-container d-none">
+                                            <img src="" alt="Preview" class="preview-image">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> --}}
+
                 <div class="modal-footer border-0 py-3">
                     <button type="button" class="btn btn-light" data-dismiss="modal">
                         <i class="ti-close me-2"></i>Cancel
@@ -1441,18 +1568,18 @@
 
     
      <!-- View  Task  -->
-    @foreach($tasks as $task)
-    <div class="modal fade" id="viewTaskModal{{ $task->id }}" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <!-- Top Header Section -->
-                <div class="bg-primary text-white p-4 d-flex align-items-center justify-content-center gap-4">
-                    <i class="ti-eye" style="font-size: 48px;"></i>
-                    <div>
-                        <h4 class="mb-2">Task Details</h4>
-                        <p class="mb-0">View complete task information</p>
-                    </div>
-                </div>
+     @foreach($tasks as $task)
+     <div class="modal" id="viewTaskModal{{ $task->id }}" tabindex="-1" role="dialog" aria-labelledby="taskDetailsTitle{{ $task->id }}">
+         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+             <div class="modal-content">
+                 <!-- Top Header Section -->
+                 <div class="bg-primary text-white p-4 d-flex align-items-center justify-content-center gap-4">
+                     <i class="ti-eye" style="font-size: 48px;" aria-hidden="true"></i>
+                     <div>
+                         <h4 class="mb-2" id="taskDetailsTitle{{ $task->id }}">Task Details</h4>
+                         <p class="mb-0">View complete task information</p>
+                     </div>
+                 </div>
     
                 <div class="d-flex flex-row">
                     <div class="flex-grow-1 p-4">
@@ -1539,8 +1666,8 @@
                 </div>
     
                 <div class="modal-footer border-0 py-3">
-                    <button type="button" class="btn btn-primary px-4" data-dismiss="modal">
-                        <i class="ti-close me-2"></i>Close
+                    <button type="button" class="btn btn-primary px-4" data-dismiss="modal" autofocus>
+                        <i class="ti-close me-2" aria-hidden="true"></i>Close
                     </button>
                 </div>
             </div>
@@ -1673,17 +1800,21 @@
         
     
         <!-- Delete Modal -->
-        <div class="modal fade" id="deleteTaskModal{{ $task->id }}" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered  modal-lg">
-                <div class="modal-content">
-                    <!-- Top Warning Section -->
-                    <div class="bg-danger text-white p-4 d-flex align-items-center justify-content-center gap-4">
-                        <i class="ti-alert" style="font-size: 48px;"></i>
-                        <div>
-                            <h4 class="mb-2">Are you sure you want to delete this task?</h4>
-                            <p class="mb-0">This action cannot be undone.</p>
-                        </div>
-                    </div>
+        <div class="modal fade" 
+        id="deleteTaskModal{{ $task->id }}" 
+        tabindex="-1" 
+        role="dialog" 
+        aria-labelledby="deleteTaskModalLabel{{ $task->id }}">
+       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+           <div class="modal-content">
+               <!-- Top Warning Section -->
+               <div class="bg-danger text-white p-4 d-flex align-items-center justify-content-center gap-4">
+                   <i class="ti-alert" style="font-size: 48px;" aria-hidden="true"></i>
+                   <div>
+                       <h4 class="mb-2" id="deleteTaskModalLabel{{ $task->id }}">Are you sure you want to delete this task?</h4>
+                       <p class="mb-0">This action cannot be undone.</p>
+                   </div>
+               </div>
         
                     <!-- Content Section -->
                     <form action="{{ route('tasks.destroy', $task->id) }}" method="POST">
@@ -1793,8 +1924,7 @@
     @endforeach
 
     
-<!-- Profile-Details Section Start -->
-
+<!-- View Profile-Details Section Start -->
 <div class="modal fade" id="viewProfileModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1830,26 +1960,38 @@
 
                 <!-- Profile Details Section -->
                 <div class="bg-light p-4 rounded">
+                    
                     <div class="form-group">
                         <label class="font-weight-bold text-primary">
                             <i class="ti-user mr-2"></i>Full Name
                         </label>
-                        <input type="text" class="form-control bg-white" value="{{ auth()->user()->name }}" readonly>
+                        <textarea 
+                            class="form-control auto-expand bg-white custom-view-textarea" 
+                            style="resize: none; min-height: 45px; border-radius: 8px;"
+                            readonly>{{ auth()->user()->name }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold text-primary">
                             <i class="ti-id-badge mr-2"></i>Username
                         </label>
-                        <input type="text" class="form-control bg-white" value="{{ auth()->user()->username }}" readonly>
+                        <textarea 
+                            class="form-control auto-expand bg-white custom-view-textarea" 
+                            style="resize: none; min-height: 45px; border-radius: 8px;"
+                            readonly>{{ auth()->user()->username }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="font-weight-bold text-primary">
                             <i class="ti-email mr-2"></i>Email Address
                         </label>
-                        <input type="email" class="form-control bg-white" value="{{ auth()->user()->email }}" readonly>
+                        <textarea 
+                            class="form-control auto-expand bg-white custom-view-textarea" 
+                            style="resize: none; min-height: 45px; border-radius: 8px;"
+                            readonly>{{ auth()->user()->email }}</textarea>
                     </div>
+
+                   
 
                     <div class="form-group">
                         <label class="font-weight-bold text-primary">
@@ -1877,6 +2019,7 @@
 
 
 <!-- Edit Profile Modal -->
+
 <div class="modal fade" id="editProfileModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1894,80 +2037,89 @@
                 <div class="modal-body">
                    
                     <!-- Profile Image Section -->
+                   
                     <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
+                        <div class="position-relative d-inline-block" id="imageContainer">
                             @if(auth()->user()->image && Storage::disk('public')->exists(auth()->user()->image))
-                            <img src="{{ Storage::url(auth()->user()->image) }}"  
-                                     id="imagePreview"
-                                     class="rounded-circle border shadow"
-                                     style="width: 150px; height: 150px; object-fit: cover;"
-                                     alt="Profile Photo">
-
-                                     <button type="button" 
-                                     class="badge badge-danger position-absolute" 
-                                     style="bottom: 15px; left: 10px; cursor: pointer; border: none;"
-                                     onclick="deleteProfileImage()">
-                                 <i class="ti-trash"></i>
-                             </button>
+                                <img src="{{ Storage::url(auth()->user()->image) }}"
+                                    id="imagePreview"
+                                    class="rounded-circle border shadow"
+                                    style="width: 150px; height: 150px; object-fit: cover;"
+                                    alt="Profile Photo">
+                    
+                                <div class="current-image">
+                                    @if(auth()->user()->image)
+                                        <button type="button"
+                                            class="badge badge-danger delete-profile-image"
+                                            data-user-id="{{ auth()->id() }}">
+                                            Delete Image
+                                        </button>
+                                    @endif
+                                </div>
                             @else
-                                <div id="imagePreview" class="profile-placeholder rounded-circle border shadow d-flex align-items-center justify-content-center"
-                                     style="width: 150px; height: 150px;">
+                                <div id="defaultPreview" class="profile-placeholder rounded-circle border shadow d-flex align-items-center justify-content-center"
+                                    style="width: 150px; height: 150px;">
                                     <i class="fas fa-user-circle"></i>
                                 </div>
                             @endif
-                            
+                    
                             <label for="image" class="badge badge-primary position-absolute" style="bottom: 15px; right: 10px; cursor: pointer;">
                                 <i class="ti-camera"></i>
                             </label>
-                            <input type="file" 
-                                   id="image" 
-                                   name="image" 
-                                   class="d-none" 
-                                   accept=".jpeg,.jpg,.png,.gif">
-                                   <input type="hidden" name="delete_image" id="delete_image" value="0">
+                            <input type="file"
+                                id="image"
+                                name="image"
+                                class="d-none"
+                                accept=".jpeg,.jpg,.png,.gif">
+                            <input type="hidden" name="delete_image" id="delete_image" value="0">
                         </div>
-                        <small class="text-muted d-block mt-2">Click camera icon to upload profile photo</small>
+                        <small class="text-muted d-block mt-2">Click camera icon to upload a New profile photo</small>
                     </div>
-                    
 
                     <!-- Profile Details Section -->
                     <div class="bg-light p-4 rounded">
+                       
                         <div class="form-group">
                             <label class="font-weight-bold text-primary">
                                 <i class="ti-user mr-2"></i>Full Name
                             </label>
-                            <input type="text" 
-                                   name="name" 
-                                   class="form-control" 
-                                   value="{{ auth()->user()->name }}" 
-                                   required 
-                                   minlength="3" 
-                                   maxlength="255">
+                            <textarea 
+                                name="name" 
+                                class="form-control auto-expand" 
+                                required 
+                                minlength="3" 
+                                maxlength="255"
+                                rows="2"
+                                style="resize: none; overflow: hidden;">{{ auth()->user()->name }}</textarea>
                         </div>
-
+                        
                         <div class="form-group">
                             <label class="font-weight-bold text-primary">
                                 <i class="ti-id-badge mr-2"></i>Username
                             </label>
-                            <input type="text" 
-                                   name="username" 
-                                   class="form-control" 
-                                   value="{{ auth()->user()->username }}" 
-                                   required 
-                                   minlength="3" 
-                                   maxlength="255">
+                            <textarea 
+                                name="username" 
+                                class="form-control auto-expand" 
+                                required 
+                                minlength="3" 
+                                maxlength="255"
+                                rows="2"
+                                style="resize: none; overflow: hidden;">{{ auth()->user()->username }}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="font-weight-bold text-primary">
                                 <i class="ti-email mr-2"></i>Email Address
                             </label>
-                            <input type="email" 
-                                   name="email" 
-                                   class="form-control" 
-                                   value="{{ auth()->user()->email }}" 
-                                   required>
+                            <textarea 
+                                name="email" 
+                                class="form-control auto-expand" 
+                                required 
+                                rows="2"
+                                style="resize: none; overflow: hidden;"
+                                data-rule-email="true">{{ auth()->user()->email }}</textarea>
                         </div>
+
 
                         
                     </div>

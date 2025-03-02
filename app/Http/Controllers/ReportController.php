@@ -29,7 +29,7 @@ public function store(Request $request, Task $task)
         }
 
         $validated = $request->validate([
-            'reason' => 'required|string|max:1000'
+            'reason' => 'required|string|min:5|max:1000'
         ]);
 
         $report = Report::create([
@@ -56,7 +56,7 @@ public function update(Request $request, Report $report)
     try {
         // Validate request data
         $validated = $request->validate([
-            'reason' => 'required|string|max:1000'
+            'reason' => 'required|string|min:5|max:1000'
         ]);
 
         // Update the report

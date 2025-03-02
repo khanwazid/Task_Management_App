@@ -57,7 +57,7 @@ Route::middleware(['auth', 'isUser'])->group(function () {
     Route::put('/profile/update', [UserController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [UserController::class, 'updatePassword'])->name('password.update');
     Route::post('/validate-current-password', [UserController::class, 'validateCurrentPassword']);
-
+    Route::post('/profile/{user}/delete-image', [UserController::class, 'deleteImage'])->name('profile.delete-image');
     //Notes Controller
     Route::post('/tasks/notes', [TaskNoteController::class, 'store'])->name('note.add');
     Route::get('/tasks/{task}/notes', [TaskNoteController::class, 'getNotes']);
@@ -103,5 +103,6 @@ Route::get('/admin/tasks', [TaskController::class, 'indexs'])->name('admin.tasks
  Route::get('/reports/{report}/fetch', [ReportController::class, 'fetch'])->name('reports.fetch');
  Route::get('/admin/tasks', [TaskController::class, 'getTasks'])->name('admin.get.tasks');
  Route::post('/admin/tasks/{task}/delete-image', [TaskController::class, 'deleteImages'])->name('admin.tasks.deleteImage');
-   
+ Route::post('/admin/tasks', [TaskController::class, 'stores'])->name('admin.tasks.store');
+ 
 });

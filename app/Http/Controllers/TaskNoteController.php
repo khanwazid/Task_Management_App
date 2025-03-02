@@ -27,7 +27,7 @@ public function store(Request $request)
     try {
         $validated = $request->validate([
             'task_id' => 'required|exists:tasks,id',
-            'content' => 'required|string|max:1000'
+            'content' => 'required|string|min:5|max:1000'
         ]);
 
         TaskNote::create([
@@ -66,7 +66,7 @@ public function update(Request $request, TaskNote $note)
 {
     try {
         $validated = $request->validate([
-            'content' => 'required|string|max:1000'
+            'content' => 'required|string|min:5|max:1000'
         ]);
 
         $note->update([
@@ -130,7 +130,7 @@ public function stores(Request $request)
 
         $validated = $request->validate([
             'task_id' => 'required|exists:tasks,id',
-            'content' => 'required|string|max:1000'
+            'content' => 'required|string|min:5|max:1000'
         ]);
 
         // Get the task and its owner
@@ -196,7 +196,7 @@ public function updates(Request $request, TaskNote $note)
         }
 
         $validated = $request->validate([
-            'content' => 'required|string|max:1000'
+            'content' => 'required|string|min:5|max:1000'
         ]);
 
         $note->update([

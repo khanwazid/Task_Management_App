@@ -1358,3 +1358,22 @@ background-color: #5a6268;
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
+
+.form-control.text-wrap {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    resize: vertical;
+}
+
+.form-control.text-wrap:focus {
+    height: auto;
+    white-space: pre-wrap;
+}
+.custom-view-textarea {
+    padding: 0.75rem 1rem;
+    line-height: 1.5;
+    overflow-y: hidden;
+    word-wrap: break-word;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}

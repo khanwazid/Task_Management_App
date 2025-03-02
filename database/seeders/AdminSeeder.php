@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -25,7 +24,7 @@ class AdminSeeder extends Seeder
                 'password' => Hash::make('password123'), // Hashing password securely
                 'role' => 'admin',
                 'image' => null, // You can also set a default image path if needed !
-                'email_verified_at' => now(),
+                
             ]
         );
 

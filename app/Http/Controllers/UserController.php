@@ -29,7 +29,7 @@ class UserController extends Controller
       
          // Validating input with custom messages
          $validatedData = $request->validate([
-            'name' => 'required|string|max:255|min:3',
+            'name' => 'required|string|min:3|max:255',
             'username' => 'required|string|min:3|max:255|unique:users,username',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:8|confirmed',
@@ -289,6 +289,8 @@ public function login(Request $request)
             return back()->with('error', 'An error occurred while updating profile');
         }
     }
+   
+    
 
     public function updatePassword(Request $request)
 {

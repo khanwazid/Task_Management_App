@@ -1,4 +1,4 @@
- $(document).ready(function() {
+$(document).ready(function() {
     // Initialize modal with proper event handling
     $('#viewProfileModal .close, #viewProfileModal button[data-dismiss="modal"]').on('click', function() {
         $('#viewProfileModal').modal('hide');
@@ -45,7 +45,7 @@
         rules: {
             title: {
                 required: true,
-                minlength: 5,
+                minlength: 3,
                 maxlength: 255
             },
             description: {
@@ -75,7 +75,7 @@
         messages: {
             title: {
                 required: "Please enter a task title",
-                minlength: "Title must be at least 5 character long",
+                minlength: "Title must be at least 3 character long",
                 maxlength: "Title cannot exceed 255 characters"
             },
             description: {
@@ -159,7 +159,7 @@
             rules: {
                 title: {
                     required: true,
-                    minlength: 5,
+                    minlength: 3,
                     maxlength: 255
                 },
                 description: {
@@ -189,7 +189,7 @@
             messages: {
                 title: {
                     required: "Please enter a task title",
-                    minlength: "Title must be at least 5 character long",
+                    minlength: "Title must be at least 3 character long",
                     maxlength: "Title cannot exceed 255 characters"
                 },
                 description: {
@@ -332,12 +332,7 @@
 
 
     // Image preview functionality
-    document.getElementById('image').onchange = function() {
-        const file = this.files[0];
-        if (file) {
-            document.getElementById('imagePreview').src = URL.createObjectURL(file);
-        }
-    };
+  
     
     // Reset form when modal is closed
     $('#editProfileModal').on('hidden.bs.modal', function () {
@@ -357,105 +352,144 @@
         $('#editProfileModal').modal('hide');
     });
 
-            $(document).ready(function() {
-    $("#editProfileForm").validate({
-        rules: {
-            name: {
-                required: true,
-                minlength: 3,
-                maxlength: 255
-            },
-            username: {
-                required: true,
-                minlength: 3,
-                maxlength: 255
-            },
-            email: {
-                required: true,
-                email: true
-            },
-            image: {
-                extension: "jpg|jpeg|png|gif",
-                filesize: 2097152 // 2MB
-            }
-        },
-        messages: {
-            name: {
-                required: "Please enter your full name",
-                minlength: "Name must be at least 3 characters long",
-                maxlength: "Name cannot exceed 255 characters"
-            },
-            username: {
-                required: "Please enter your username",
-                minlength: "Username must be at least 3 characters long",
-                maxlength: "Username cannot exceed 255 characters"
-            },
-            email: {
-                required: "Please enter your email address",
-                email: "Please enter a valid email address"
-            },
-            image: {
-                extension: "Please upload a valid image file (jpg, jpeg, png, gif)",
-                filesize: "Image size must not exceed 2MB"
-            }
-        },
-        errorElement: 'div',
-        errorClass: 'invalid-feedback',
-        highlight: function(element, errorClass, validClass) {
-            $(element).addClass('is-invalid').removeClass('is-valid');
-        },
-        unhighlight: function(element, errorClass, validClass) {
-            $(element).addClass('is-valid').removeClass('is-invalid');
-        },
-        errorPlacement: function(error, element) {
-            error.insertAfter(element);
-        }
-    });
+    $(document).ready(function() {
+        // Auto expand textarea based on content
+function autoExpand(textarea) {
+textarea.style.height = 'auto';
+textarea.style.height = (textarea.scrollHeight) + 'px';
+}
 
-    // Custom method for file extension validation
-    $.validator.addMethod("extension", function(value, element, param) {
-        param = typeof param === "string" ? param.replace(/,/g, "|") : "png|jpe?g|gif";
-        return this.optional(element) || value.match(new RegExp("\\.(" + param + ")$", "i"));
-    });
+// Apply to all textareas with auto-expand class
+$('.auto-expand').each(function() {
+autoExpand(this);
+}).on('input', function() {
+autoExpand(this);
+});
 
-    // Custom method for file size validation
-    $.validator.addMethod("filesize", function(value, element, param) {
-        return this.optional(element) || (element.files[0].size <= param);
-    });
+// Add this to your existing modal reset handler
+$('#editProfileModal').on('hidden.bs.modal', function () {
+$('.auto-expand').each(function() {
+    this.style.height = 'auto';
+});
+});
+$("#editProfileForm").validate({
+rules: {
+    name: {
+        required: true,
+        minlength: 3,
+        maxlength: 255
+    },
+    username: {
+        required: true,
+        minlength: 3,
+        maxlength: 255
+    },
+    email: {
+        required: true,
+        email: true
+    },
+    image: {
+        extension: "jpg|jpeg|png|gif",
+        filesize: 2097152 // 2MB
+    }
+},
+messages: {
+    name: {
+        required: "Please enter your full name",
+        minlength: "Name must be at least 3 characters long",
+        maxlength: "Name cannot exceed 255 characters"
+    },
+    username: {
+        required: "Please enter your username",
+        minlength: "Username must be at least 3 characters long",
+        maxlength: "Username cannot exceed 255 characters"
+    },
+    email: {
+        required: "Please enter your email address",
+        email: "Please enter a valid email address"
+    },
+    image: {
+        extension: "Please upload a valid image file (jpg, jpeg, png, gif)",
+        filesize: "Image size must not exceed 2MB"
+    }
+},
+errorElement: 'div',
+errorClass: 'invalid-feedback',
+highlight: function(element, errorClass, validClass) {
+    $(element).addClass('is-invalid').removeClass('is-valid');
+},
+unhighlight: function(element, errorClass, validClass) {
+    $(element).addClass('is-valid').removeClass('is-invalid');
+},
+errorPlacement: function(error, element) {
+    error.insertAfter(element);
+}
+});
 
-    $("#image").change(function() {
+// Custom method for file extension validation
+$.validator.addMethod("extension", function(value, element, param) {
+param = typeof param === "string" ? param.replace(/,/g, "|") : "png|jpe?g|gif";
+return this.optional(element) || value.match(new RegExp("\\.(" + param + ")$", "i"));
+});
+
+// Custom method for file size validation
+$.validator.addMethod("filesize", function(value, element, param) {
+return this.optional(element) || (element.files[0].size <= param);
+});
+$("#image").change(function() {
     if (this.files && this.files[0]) {
         var reader = new FileReader();
+        
         reader.onload = function(e) {
-            // Remove placeholder if it exists
-            if ($("#imagePreview").hasClass('profile-placeholder')) {
-                $("#imagePreview").replaceWith(
-                    `<img src="${e.target.result}"
-                         id="imagePreview"
-                         class="rounded-circle border shadow"
-                         style="width: 150px; height: 150px; object-fit: cover;"
-                         alt="Profile Photo">`
-                );
-            } else {
-                // Update existing image
-                $("#imagePreview").attr("src", e.target.result);
-            }
+            var imageContainer = $("#imageContainer");
+            
+            // Remove existing preview elements
+            $("#imagePreview, #defaultPreview").remove();
+            
+            // Create new image preview
+            var newImage = $('<img>', {
+                id: 'imagePreview',
+                src: e.target.result,
+                class: 'rounded-circle border shadow',
+                style: 'width: 150px; height: 150px; object-fit: cover;',
+                alt: 'Profile Photo'
+            });
+            
+            // Insert the new image before the label
+            imageContainer.find('label').before(newImage);
         };
+        
         reader.readAsDataURL(this.files[0]);
     }
 });
 
-    // Store original image source
-    var originalImageSrc = $("#imagePreview").attr("src");
+// Handle image deletion
+$(document).on('click', '.delete-profile-image', function() {
+    $("#delete_image").val(1);
+    $("#imagePreview").remove();
+    
+    // Show default preview
+    var defaultPreview = $('<div>', {
+        id: 'defaultPreview',
+        class: 'profile-placeholder rounded-circle border shadow d-flex align-items-center justify-content-center',
+        style: 'width: 150px; height: 150px;'
+    }).append('<i class="fas fa-user-circle"></i>');
+    
+    $("#imageContainer").find('label').before(defaultPreview);
+    $(this).parent().remove();
+});
 
-    // Reset form when modal closes
-    $('#editProfileModal').on('hidden.bs.modal', function () {
-        $('#editProfileForm').trigger('reset');
-        $('#editProfileForm').validate().resetForm();
-        $('.is-invalid').removeClass('is-invalid');
-        $('.is-valid').removeClass('is-valid');
-        $("#imagePreview").attr("src", originalImageSrc);
-    });
+// Store original image source
+var originalImageSrc = $("#imagePreview").attr("src");
+
+// Reset form when modal closes
+$('#editProfileModal').on('hidden.bs.modal', function () {
+$('#editProfileForm').trigger('reset');
+$('#editProfileForm').validate().resetForm();
+$('.is-invalid').removeClass('is-invalid');
+$('.is-valid').removeClass('is-valid');
+$("#imagePreview").attr("src", originalImageSrc);
+});
 });
        
 $(document).ready(function() {
@@ -564,15 +598,6 @@ function showFullDescription(button) {
     cell.classList.toggle('expanded');
 }
 
-
-    function deleteProfileImage() {
-    if (confirm('Are you sure you want to delete your profile picture?')) {
-        document.getElementById('delete_image').value = '1';
-        document.getElementById('imagePreview').src = '';
-        document.getElementById('imagePreview').innerHTML = '<i class="fas fa-user-circle"></i>';
-        document.getElementById('imagePreview').className = 'profile-placeholder rounded-circle border shadow d-flex align-items-center justify-content-center';
-    }
-}
 
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -897,4 +922,30 @@ $(document).ready(function() {
         $('.is-valid').removeClass('is-valid');
     });
 
+});
+
+$(document).ready(function() {
+    // Handle modal focus management
+    $('.modal').on('shown.bs.modal', function() {
+        $(this).find('[autofocus]').focus();
+    });
+
+    // Prevent flickering
+    $('.modal').on('show.bs.modal', function() {
+        $(this).removeAttr('aria-hidden');
+    });
+});
+
+$(document).ready(function() {
+    function autoExpandTextarea() {
+        $('.custom-view-textarea').each(function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    }
+
+    // Run on modal show
+    $('#viewProfileModal').on('shown.bs.modal', function() {
+        autoExpandTextarea();
+    });
 });

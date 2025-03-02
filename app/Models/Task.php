@@ -20,7 +20,16 @@ class Task extends Model
         'taskimage',
     ];
   
-    
+    public function getProgressPercentage()
+{
+    return match($this->status) {
+        'pending' => 0,
+        'in_progress' => 50,
+        'completed' => 100,
+        default => 0
+    };
+}
+
    
     
     protected $dates = ['due_date'];

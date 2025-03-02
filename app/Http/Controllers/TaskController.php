@@ -26,8 +26,8 @@ class TaskController extends Controller
 {
     try {
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string|max:500',
+          'title'       => 'required|string|min:3|max:255',
+            'description' => 'required|string|min:5|max:500',
              'priority'    => 'required|in:low,medium,high', // Added priority validation
             'status'      => 'required|in:pending,in_progress,completed',
             'due_date'    => 'required|date',
@@ -55,8 +55,8 @@ public function update(Request $request, Task $task)
 {
     try {
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string|max:500',
+            'title'       => 'required|string|min:3|max:255',
+            'description' => 'required|string|min:5|max:500',
             'priority'    => 'required|in:low,medium,high',
             'status'      => 'required|in:pending,in_progress,completed',
             'due_date'    => 'required|date',
@@ -110,6 +110,9 @@ public function deleteImage(Task $task)
 public function destroy(Task $task)
 {
     try {
+        if ($task->taskimage) {
+            Storage::delete('public/taskimages/' . $task->taskimage);
+        }
         $task->delete();
         return redirect()->back()->with('success', 'Task deleted successfully.');
     } catch (\Exception $e) {
@@ -145,8 +148,8 @@ public function updates(Request $request, Task $task)
         }
 
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string|max:500',
+            'title'       => 'required|string|min:3|max:255',
+            'description' => 'required|string|min:5|max:500',
             'priority'    => 'required|in:low,medium,high',
             'status'      => 'required|in:pending,in_progress,completed',
             'due_date'    => 'required|date',
@@ -207,6 +210,9 @@ public function destroys(Task $task)
     }
 
     try {
+        if ($task->taskimage) {
+            Storage::delete('public/taskimages/' . $task->taskimage);
+        }
         $task->delete();
         return redirect()->back()->with('success', 'Task deleted successfully.');
     } catch (\Exception $e) {
@@ -273,4 +279,30 @@ public function deleteImages(Task $task)
     }
 }
 
+public function stores(Request $request)
+{
+    try {
+        $validated = $request->validate([
+          'title'       => 'required|string|min:3|max:255',
+            'description' => 'required|string|min:5|max:500',
+             'priority'    => 'required|in:low,medium,high', // Added priority validation
+            'status'      => 'required|in:pending,in_progress,completed',
+            'due_date'    => 'required|date',
+             'taskimage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($request->hasFile('taskimage')) {
+            $image = $request->file('taskimage');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/taskimages', $filename);
+            $validated['taskimage'] = $filename;
+        }
+
+        auth()->user()->tasks()->create($validated);
+
+        return redirect()->back()->with('success', 'Task created successfully.');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Something went wrong! Please try again.');
+    }
+}
 }
