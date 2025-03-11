@@ -18,7 +18,7 @@ use App\Http\Controllers\TaskNoteController;
 */
 
 Route::get('/', function () {
-    return view('home ');
+    return view('home');
 });
 
 

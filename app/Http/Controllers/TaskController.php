@@ -221,16 +221,13 @@ public function destroys(Task $task)
 }
 
 
-
-
-
 public function getUsers()
 {
     $users = User::select('id', 'name', 'email', 'role', 'created_at', 'enable')
         ->where('role', '!=', 'admin')
-        ->get();
+        ->paginate(5);
     
-    $userCount = $users->count();
+    $userCount = User::where('role', '!=', 'admin')->count();
     
     return response()->json([
         'users' => $users,
@@ -255,7 +252,7 @@ public function toggleStatus($id)
 
 public function getTasks()
 {
-    $tasks = Task::with('user')->get();
+    $tasks = Task::with('user')->paginate(5);
     $taskCount = Task::count();
 
     return response()->json([

@@ -563,6 +563,14 @@
                              <i class="fas fa-plus-circle"></i>
                              <span>Add Note</span>
                          </button>--}}
+                         
+                         @if(auth()->id() === $task->user_id)
+    <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+            onclick="showAddNoteForm({{ $task->id }})">
+        <i class="fas fa-plus-circle"></i>
+        <span>Add Note</span>
+    </button>
+@endif
                      </div>
                  
 
@@ -1084,6 +1092,14 @@ data-priority="medium"
                              <i class="fas fa-plus-circle"></i>
                              <span>Add Note</span>
                          </button> --}} 
+                         
+                         @if(auth()->id() === $task->user_id)
+    <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+            onclick="showAddNoteForm({{ $task->id }})">
+        <i class="fas fa-plus-circle"></i>
+        <span>Add Note</span>
+    </button>
+@endif
                      </div>
                  
 
@@ -1600,6 +1616,15 @@ data-priority="medium"
                              <i class="fas fa-plus-circle"></i>
                              <span>Add Note</span>
                          </button> --}}
+
+                         @if(auth()->id() === $task->user_id)
+    <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+            onclick="showAddNoteForm({{ $task->id }})">
+        <i class="fas fa-plus-circle"></i>
+        <span>Add Note</span>
+    </button>
+@endif
+
                      </div>
                  
 
@@ -1749,24 +1774,21 @@ data-priority="medium"
 
 <!-- Action Buttons -->
 <div class="action-buttons d-flex justify-content-end gap-2">
-    
-    <button type="button" 
+     <button type="button" 
         class="btn btn-light btn-sm rounded-circle" 
         data-toggle="modal" 
         data-target="#viewTaskModal{{ $task->id }}" 
         aria-label="View task details" title="View Details">
     <i class="far fa-eye text-info" aria-hidden="true"></i>
 </button>
-
-
-    <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
+<button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#editTaskModal{{ $task->id }}" title="Edit Task">
         <i class="far fa-pen-to-square text-warning"></i>
     </button>
     <button class="btn btn-light btn-sm rounded-circle" data-toggle="modal" data-target="#deleteTaskModal{{ $task->id }}" title="Delete Task">
         <i class="far fa-trash-can text-danger"></i>
     </button>
 </div>
-
+</div>
              
 
              @empty
@@ -2014,7 +2036,7 @@ data-priority="medium"
     </div>
     
      <!-- Create Task Modal -->
-   <div class="modal fade" id="createTaskModal" tabindex="-1">
+   <div class="modal fade" id="createTaskModal" tabindex="-1"  role="dialog" aria-modal="true" aria-labelledby="createTaskModalLabel" >
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <!-- Top Header Section -->
@@ -2498,8 +2520,7 @@ data-priority="medium"
 @endforeach
 
 
-<!-- Users Modal for all users -->
-
+<!-- Users Modal for all usersWazid -->
 <div class="modal fade" id="viewUsersModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -2529,7 +2550,8 @@ data-priority="medium"
                             </tr>
                         </tbody>
                     </table>
-                    
+                    <!-- Add pagination container -->
+                    <div id="userPagination" class="mt-3"></div>
                 </div>
             </div>
 
@@ -2538,7 +2560,6 @@ data-priority="medium"
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">
                     <i class="ti-close me-2"></i>Close
                 </button>
-                
             </div>
         </div>
     </div>
@@ -2575,6 +2596,8 @@ data-priority="medium"
                             </tr>
                         </tbody>
                     </table>
+                    <!-- Add this pagination container -->
+                    <div id="tasksPagination" class="mt-3"></div>
                 </div>
             </div>
 
@@ -2883,7 +2906,7 @@ data-priority="medium"
 
 
 <script>
-$(document).ready(function() {
+    $(document).ready(function() {
     function updateUserCount() {
         $.ajax({
             url: '{{ route("admin.get.users") }}',
@@ -2896,14 +2919,14 @@ $(document).ready(function() {
 
     updateUserCount();
 
-    $('#viewUsersModal').on('show.bs.modal', function() {
+    function loadUsers(page) {
         $.ajax({
-            url: '{{ route("admin.get.users") }}',
+            url: `{{ route("admin.get.users") }}?page=${page}`,
             method: 'GET',
             success: function(response) {
                 let tbody = '';
-                response.users.forEach(function(user) {
-                    let isChecked = user.enable === 0 ? 'checked' : ''; // 0 means enabled
+                response.users.data.forEach(function(user) {
+                    let isChecked = user.enable === 0 ? 'checked' : '';
                     let statusText = user.enable === 0 ? 'Enabled' : 'Disabled';
 
                     tbody += `
@@ -2925,98 +2948,162 @@ $(document).ready(function() {
                     `;
                 });
                 $('#userTableBody').html(tbody);
-
-                $('.user-status').off('change').on('change', function() {
-                    const checkbox = $(this);
-                    const statusLabel = checkbox.siblings('.status-label');
-                    const userId = checkbox.data('user-id');
-                    const newStatus = checkbox.prop('checked') ? 0 : 1; // 0 = Enabled, 1 = Disabled
-
-                    $.ajax({
-                        url: '{{ url("admin/users") }}/' + userId + '/toggle-status',
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            enable: newStatus
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                toastr.success(response.message);
-                                setTimeout(function() {
-                                    location.reload(); // Refresh the page naturally
-                                }, 1500);
-                                statusLabel.text(response.new_status === 0 ? 'Enabled' : 'Disabled');
-                                updateUserCount();
-                            }
-                        },
-                        error: function() {
-                            toastr.error('Failed to update user status');
-                            checkbox.prop('checked', !checkbox.prop('checked'));
-                        }
-                    });
-                });
+                updatePagination(response.users);
+                setupStatusToggle();
             }
         });
+    }
+
+    function updatePagination(userData) {
+        let pagination = '<ul class="pagination justify-content-center">';
+        
+        for (let i = 1; i <= userData.last_page; i++) {
+            pagination += `
+                <li class="page-item ${userData.current_page === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+
+        pagination += '</ul>';
+        $('#userPagination').html(pagination);
+    }
+
+    function setupStatusToggle() {
+        $('.user-status').off('change').on('change', function() {
+            const checkbox = $(this);
+            const statusLabel = checkbox.siblings('.status-label');
+            const userId = checkbox.data('user-id');
+            const newStatus = checkbox.prop('checked') ? 0 : 1;
+
+            $.ajax({
+                url: '{{ url("admin/users") }}/' + userId + '/toggle-status',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    enable: newStatus
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                        statusLabel.text(response.new_status === 0 ? 'Enabled' : 'Disabled');
+                        updateUserCount();
+                    }
+                },
+                error: function() {
+                    toastr.error('Failed to update user status');
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                }
+            });
+        });
+    }
+
+    $('#viewUsersModal').on('show.bs.modal', function() {
+        loadUsers(1);
+    });
+
+    $(document).on('click', '#userPagination .page-link', function(e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        loadUsers(page);
     });
 });
-
 </script>
 
 <script>
      $(document).ready(function() {
-        function updateTaskCount() {
-            $.ajax({
-                url: '{{ route("admin.get.tasks") }}',
-                method: 'GET',
-                success: function(response) {
-                    $('#taskCount').text(response.taskCount);
-                }
-            });
-        }
-
-        updateTaskCount();
-
-        $('#tasksModal').on('show.bs.modal', function() {
-            $.ajax({
-                url: '{{ route("admin.get.tasks") }}',
-                method: 'GET',
-                success: function(response) {
-                    let tbody = '';
-                    response.tasks.forEach(function(task) {
-                        tbody += `
-                            <tr>
-                                <td title="${task.title}">${task.title}</td>
-                                <td title="${task.description}">${task.description}</td>
-                                <td><span class="badge bg-${getPriorityColor(task.priority)}">${task.priority}</span></td>
-                                <td><span class="badge bg-${getStatusColor(task.status)}">${task.status}</span></td>
-                                <td>${new Date(task.due_date).toLocaleDateString()}</td>
-                                <td>${task.user ? task.user.name : 'Unassigned'}</td>
-                            </tr>
-                        `;
-                    });
-                    $('#tasksTableBody').html(tbody);
-                }
-            });
+    function updateTaskCount() {
+        $.ajax({
+            url: '{{ route("admin.get.tasks") }}',
+            method: 'GET',
+            success: function(response) {
+                $('#taskCount').text(response.taskCount);
+            }
         });
+    }
 
-        function getPriorityColor(priority) {
-            const colors = {
-                'high': 'danger',
-                'medium': 'warning',
-                'low': 'info'
-            };
-            return colors[priority.toLowerCase()] || 'secondary';
+    updateTaskCount();
+
+    let currentPage = 1;
+
+    function loadTasks(page) {
+        $.ajax({
+            url: `{{ route("admin.get.tasks") }}?page=${page}`,
+            method: 'GET',
+            success: function(response) {
+                let tbody = '';
+                response.tasks.data.forEach(function(task) {
+                    tbody += `
+                        <tr>
+                            <td title="${task.title}">${task.title}</td>
+                            <td title="${task.description}">${task.description}</td>
+                            <td><span class="badge bg-${getPriorityColor(task.priority)}">${task.priority}</span></td>
+                            <td><span class="badge bg-${getStatusColor(task.status)}">${task.status}</span></td>
+                            <td>${new Date(task.due_date).toLocaleDateString()}</td>
+                            <td>${task.user ? task.user.name : 'Unassigned'}</td>
+                        </tr>
+                    `;
+                });
+                $('#tasksTableBody').html(tbody);
+                
+                // Update pagination
+                updatePagination(response.tasks);
+            }
+        });
+    }
+
+    function updatePagination(tasksData) {
+        let pagination = '<ul class="pagination justify-content-center">';
+        
+       
+
+        // Page Numbers
+        for (let i = 1; i <= tasksData.last_page; i++) {
+            pagination += `
+                <li class="page-item ${tasksData.current_page === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
         }
 
-        function getStatusColor(status) {
-            const colors = {
-                'pending': 'warning',
-                'in_progress': 'info',
-                'completed': 'success'
-            };
-            return colors[status.toLowerCase()] || 'secondary';
-        }
+       
+
+        pagination += '</ul>';
+        $('#tasksPagination').html(pagination);
+    }
+
+    $('#tasksModal').on('show.bs.modal', function() {
+        loadTasks(1);
     });
+
+    // Handle pagination clicks
+    $(document).on('click', '#tasksPagination .page-link', function(e) {
+        e.preventDefault();
+        const page = $(this).data('page');
+        loadTasks(page);
+    });
+
+    function getPriorityColor(priority) {
+        const colors = {
+            'high': 'danger',
+            'medium': 'warning',
+            'low': 'info'
+        };
+        return colors[priority.toLowerCase()] || 'secondary';
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            'pending': 'warning',
+            'in_progress': 'info',
+            'completed': 'success'
+        };
+        return colors[status.toLowerCase()] || 'secondary';
+    }
+});
   
 </script>
 

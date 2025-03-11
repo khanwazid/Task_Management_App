@@ -1438,7 +1438,7 @@
     
     
     <!-- Create Task Modal -->
-    <div class="modal fade" id="createTaskModal" tabindex="-1" role="dialog" aria-labelledby="createTaskModalLabel">
+    <div class="modal fade" id="createTaskModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="createTaskModalLabel">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <!-- Modal Header -->
