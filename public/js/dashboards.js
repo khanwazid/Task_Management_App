@@ -148,12 +148,11 @@ $(document).ready(function() {
     });
 });
 
-
-    $(document).ready(function() {
-        $.validator.addMethod("fileSize", function(value, element, param) {
-            return this.optional(element) || (element.files[0] && element.files[0].size <= param);
-        }, "File size must be less than 2MB");
-        
+$(document).ready(function() {
+    $.validator.addMethod("fileSize", function(value, element, param) {
+        return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+    }, "File size must be less than 2MB");
+    
     $("form[id^='editTaskForm']").each(function() {
         $(this).validate({
             rules: {
@@ -183,7 +182,6 @@ $(document).ready(function() {
                     required: false, // Optional
                     extension: "jpg|jpeg|png|gif",// Allowed file types
                     fileSize: 2097152 // 2MB
-    
                 }
             },
             messages: {
@@ -226,14 +224,53 @@ $(document).ready(function() {
             },
             ignore: []
         });
-        
     });
 
- 
+    // Handle image deletion
+    $('.delete-image').on('click', function(e) {
+        e.preventDefault();
+        
+        const taskId = $(this).data('task-id');
+        const imageContainer = $(this).closest('.current-image');
+        
+        if (confirm('Are you sure you want to mark this image for deletion?')) {
+            // Hide the image container
+            imageContainer.hide();
+            
+            // Add a hidden input to mark the image for deletion when the form is submitted
+            const form = $(this).closest('form');
+            
+            // Remove any existing delete_image input to avoid duplicates
+            form.find('input[name="delete_image"]').remove();
+            
+            // Add the delete_image flag
+            form.append('<input type="hidden" name="delete_image" value="1">');
+            
+            // Show a message that the image will be deleted upon saving
+            const message = $('<div class="alert alert-warning mt-2 deletion-message">Image marked for deletion. Changes will apply after saving.</div>');
+            imageContainer.after(message);
+        }
+    });
     
-   
-  // Enhanced reset when modal closes
-  $('[id^="editTaskModal"]').on('hidden.bs.modal', function () {
+    // When a new file is selected, remove the delete flag
+    $('input[name="taskimage"]').on('change', function() {
+        const form = $(this).closest('form');
+        
+        // If a file is selected, remove the delete_image flag
+        if (this.files.length > 0) {
+            form.find('input[name="delete_image"]').remove();
+            form.find('.deletion-message').remove();
+            
+            // Show a message about the new image
+            const fileInput = $(this);
+            if (!fileInput.next('.new-image-message').length) {
+                fileInput.after('<div class="alert alert-info mt-2 new-image-message">New image selected. Changes will apply after saving.</div>');
+            }
+        }
+    });
+    
+    // Enhanced reset when modal closes
+    $('[id^="editTaskModal"]').on('hidden.bs.modal', function () {
         let formId = $(this).find('form').attr('id');
         let form = $('#' + formId);
         
@@ -245,6 +282,15 @@ $(document).ready(function() {
         // Reset form to original values
         form[0].reset();
         
+        // Remove the hidden delete_image input if it exists
+        form.find('input[name="delete_image"]').remove();
+        
+        // Show the image container again if it was hidden
+        form.find('.current-image').show();
+        
+        // Remove any deletion or new image messages
+        form.find('.deletion-message, .new-image-message').remove();
+        
         // Restore original values from data attributes
         form.find('input, textarea, select').each(function() {
             let originalValue = $(this).data('original-value');
@@ -253,38 +299,9 @@ $(document).ready(function() {
             }
         });
     });
-    $('.delete-image').on('click', function(e) {
-        e.preventDefault();
-        
-        const taskId = $(this).data('task-id');
-        const imageContainer = $(this).closest('.current-image');
-        
-        if (confirm('Are you sure you want to delete this image?')) {
-            $.ajax({
-                url: `/tasks/${taskId}/delete-image`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        imageContainer.remove();
-                    }
-                },
-                error: function() {
-                    alert('Error deleting image. Please try again.');
-                }
-            });
-        }
-    });
-
-    // Store original values when page loads
-    $("form[id^='editTaskForm']").each(function() {
-        $(this).find('input, textarea, select').each(function() {
-            $(this).data('original-value', $(this).val());
-        });
-    });
 });
+
+    
 
 
     $(document).ready(function() {
@@ -947,5 +964,15 @@ $(document).ready(function() {
     // Run on modal show
     $('#viewProfileModal').on('shown.bs.modal', function() {
         autoExpandTextarea();
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".delete-task-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            this.disabled = true; // Disable button after clicking
+            this.innerHTML = '<i class="ti-trash me-2"></i>Deleting...'; // Change button text
+            this.closest("form").submit(); // Submit the form
+        });
     });
 });

@@ -114,11 +114,11 @@ $('#createTaskModal').on('hidden.bs.modal', function () {
   $(document).on('click', '[data-bs-dismiss="modal"], .modal .close', function() {
     $(this).closest('.modal').modal('hide');
 });
-    $(document).ready(function() {
-        $.validator.addMethod("fileSize", function(value, element, param) {
-            return this.optional(element) || (element.files[0] && element.files[0].size <= param);
-        }, "File size must be less than 2MB");
-        
+$(document).ready(function() {
+    $.validator.addMethod("fileSize", function(value, element, param) {
+        return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+    }, "File size must be less than 2MB");
+    
     $("form[id^='editTaskForm']").each(function() {
         $(this).validate({
             rules: {
@@ -133,10 +133,12 @@ $('#createTaskModal').on('hidden.bs.modal', function () {
                     maxlength: 500
                 },
                 priority: {
-                    required: true
+                    required: true,
+                    valueNotEquals: ""
                 },
                 status: {
-                    required: true
+                    required: true,
+                    valueNotEquals: ""
                 },
                 due_date: {
                     required: true,
@@ -146,25 +148,26 @@ $('#createTaskModal').on('hidden.bs.modal', function () {
                     required: false, // Optional
                     extension: "jpg|jpeg|png|gif",// Allowed file types
                     fileSize: 2097152 // 2MB
-    
                 }
             },
             messages: {
                 title: {
                     required: "Please enter a task title",
-                    minlength: "Title must be at least 3 characters long",
+                    minlength: "Title must be at least 3 character long",
                     maxlength: "Title cannot exceed 255 characters"
                 },
                 description: {
                     required: "Please enter a task description",
-                    minlength: "Description must be at least 5 characters long",
+                    minlength: "Description must be at least 5 character long",
                     maxlength: "Description cannot exceed 500 characters"
                 },
                 priority: {
-                    required: "Please select a priority level"
+                    required: "Please select a priority level",
+                    valueNotEquals: "Please select a priority level"
                 },
                 status: {
-                    required: "Please select a status"
+                    required: "Please select a status",
+                    valueNotEquals: "Please select a status"
                 },
                 due_date: {
                     required: "Please select a due date",
@@ -176,49 +179,91 @@ $('#createTaskModal').on('hidden.bs.modal', function () {
             },
             errorElement: 'div',
             errorClass: 'invalid-feedback',
-            highlight: function(element) {
+            highlight: function(element, errorClass, validClass) {
                 $(element).addClass('is-invalid').removeClass('is-valid');
             },
-            unhighlight: function(element) {
+            unhighlight: function(element, errorClass, validClass) {
                 $(element).addClass('is-valid').removeClass('is-invalid');
             },
             errorPlacement: function(error, element) {
                 error.insertAfter(element);
-            }
+            },
+            ignore: []
         });
     });
 
+    // Handle image deletion
     $('.delete-image').on('click', function(e) {
         e.preventDefault();
         
         const taskId = $(this).data('task-id');
         const imageContainer = $(this).closest('.current-image');
         
-        if (confirm('Are you sure you want to delete this image?')) {
-            $.ajax({
-                url: `/admin/tasks/${taskId}/delete-image`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        imageContainer.remove();
-                    }
-                },
-                error: function() {
-                    alert('Error deleting image. Please try again.');
-                }
-            });
+        if (confirm('Are you sure you want to mark this image for deletion?')) {
+            // Hide the image container
+            imageContainer.hide();
+            
+            // Add a hidden input to mark the image for deletion when the form is submitted
+            const form = $(this).closest('form');
+            
+            // Remove any existing delete_image input to avoid duplicates
+            form.find('input[name="delete_image"]').remove();
+            
+            // Add the delete_image flag
+            form.append('<input type="hidden" name="delete_image" value="1">');
+            
+            // Show a message that the image will be deleted upon saving
+            const message = $('<div class="alert alert-warning mt-2 deletion-message">Image marked for deletion. Changes will apply after saving.</div>');
+            imageContainer.after(message);
         }
     });
-
-    // Reset validation when modal closes
-    $(".modal").on('hidden.bs.modal', function () {
-        let form = $(this).find("form");
+    
+    // When a new file is selected, remove the delete flag
+    $('input[name="taskimage"]').on('change', function() {
+        const form = $(this).closest('form');
+        
+        // If a file is selected, remove the delete_image flag
+        if (this.files.length > 0) {
+            form.find('input[name="delete_image"]').remove();
+            form.find('.deletion-message').remove();
+            
+            // Show a message about the new image
+            const fileInput = $(this);
+            if (!fileInput.next('.new-image-message').length) {
+                fileInput.after('<div class="alert alert-info mt-2 new-image-message">New image selected. Changes will apply after saving.</div>');
+            }
+        }
+    });
+    
+    // Enhanced reset when modal closes
+    $('[id^="editTaskModal"]').on('hidden.bs.modal', function () {
+        let formId = $(this).find('form').attr('id');
+        let form = $('#' + formId);
+        
+        // Reset the validation state
         form.validate().resetForm();
+        $('.is-invalid').removeClass('is-invalid');
+        $('.is-valid').removeClass('is-valid');
+        
+        // Reset form to original values
         form[0].reset();
-        form.find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
+        
+        // Remove the hidden delete_image input if it exists
+        form.find('input[name="delete_image"]').remove();
+        
+        // Show the image container again if it was hidden
+        form.find('.current-image').show();
+        
+        // Remove any deletion or new image messages
+        form.find('.deletion-message, .new-image-message').remove();
+        
+        // Restore original values from data attributes
+        form.find('input, textarea, select').each(function() {
+            let originalValue = $(this).data('original-value');
+            if (originalValue !== undefined) {
+                $(this).val(originalValue);
+            }
+        });
     });
 });
 
@@ -1118,4 +1163,13 @@ function deleteProfileImage() {
     });
 
 
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".delete-task-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                this.disabled = true; // Disable button after clicking
+                this.innerHTML = '<i class="ti-trash me-2"></i>Deleting...'; // Change button text
+                this.closest("form").submit(); // Submit the form
+            });
+        });
+    });
    

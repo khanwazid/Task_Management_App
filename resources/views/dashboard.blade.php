@@ -1714,7 +1714,7 @@
                                         </div>
                                     </div>
         
-                                   <!-- Add this inside the modal body, after the existing fields -->
+                                  <!-- Task Image Section -->
 <div class="col-12 mt-3">
     <div class="form-group">
         <label class="form-label fw-bold text-primary">
@@ -1723,7 +1723,7 @@
         
         @if($task->taskimage)
         <div class="current-image mb-2">
-            <img src="{{ Storage::url('taskimages/' . $task->taskimage) }}" 
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}" 
                  alt="Task Image" 
                  class="img-thumbnail" 
                  style="max-width: 200px">
@@ -1735,13 +1735,19 @@
             </button>
         </div>
         @endif
-
+        
+        <div class="form-text text-muted mb-2">
+            <i class="fas fa-info-circle"></i> 
+            Upload a new image or delete the existing one.
+        </div>
+        
         <input type="file" 
                name="taskimage" 
                class="form-control" 
                accept="image/*">
     </div>
 </div>
+
 
 
                                     <!-- Priority, Status, Due Date -->
@@ -1910,9 +1916,9 @@
                             <button type="button" class="btn btn-light px-4" data-dismiss="modal">
                                 <i class="ti-close me-2"></i>Cancel
                             </button>
-                            <button type="submit" class="btn btn-danger px-4">
-                                <i class="ti-trash me-2"></i>Delete Task
-                            </button>
+                            <button type="submit" class="btn btn-danger px-4 delete-task-btn">
+    <i class="ti-trash me-2"></i>Delete Task
+</button>
                         </div>
                     </form>
                 </div>

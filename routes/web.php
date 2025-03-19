@@ -64,7 +64,7 @@ Route::middleware(['auth', 'isUser'])->group(function () {
     Route::delete('/tasks/notes/{note}', [TaskNoteController::class, 'destroy']);
     Route::get('/tasks/notes/{note}/edit', [TaskNoteController::class, 'edit'])->name('note.edit');
     Route::put('/tasks/notes/{note}', [TaskNoteController::class, 'update'])->name('note.update');
-    Route::post('/tasks/{task}/delete-image', [TaskController::class, 'deleteImage'])->name('tasks.deleteImage');
+  //  Route::post('/tasks/{task}/delete-image', [TaskController::class, 'deleteImage'])->name('tasks.deleteImage');
 
 });
 
@@ -102,7 +102,7 @@ Route::get('/admin/tasks', [TaskController::class, 'indexs'])->name('admin.tasks
  Route::delete('/tasks/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
  Route::get('/reports/{report}/fetch', [ReportController::class, 'fetch'])->name('reports.fetch');
  Route::get('/admin/tasks', [TaskController::class, 'getTasks'])->name('admin.get.tasks');
- Route::post('/admin/tasks/{task}/delete-image', [TaskController::class, 'deleteImages'])->name('admin.tasks.deleteImage');
+// Route::post('/admin/tasks/{task}/delete-image', [TaskController::class, 'deleteImages'])->name('admin.tasks.deleteImage');
  Route::post('/admin/tasks', [TaskController::class, 'stores'])->name('admin.tasks.store');
  
 });

@@ -592,16 +592,21 @@
                                      
                                      <!-- Note Actions -->
                                      <div class="note-actions d-flex gap-2">
+                                        @if(auth()->id() === $task->user_id)
                                          <button class="btn btn-light btn-sm rounded-circle" 
                                                  onclick="editNote({{ $note->id }})"
                                                  title="Edit Note">
                                              <i class="fas fa-edit text-primary"></i>
                                          </button>
+                                         @endif
+
+                                         @if(auth()->id() === $task->user_id)
                                          <button class="btn btn-light btn-sm rounded-circle" 
                                                  onclick="deleteNote({{ $note->id }})"
                                                  title="Delete Note">
                                              <i class="fas fa-trash text-danger"></i>
                                          </button>
+                                         @endif
                                      </div>
                                  </div>
                                  
@@ -1121,16 +1126,21 @@ data-priority="medium"
                                      
                                      <!-- Note Actions -->
                                      <div class="note-actions d-flex gap-2">
+                                        @if(auth()->id() === $task->user_id)
                                          <button class="btn btn-light btn-sm rounded-circle" 
                                                  onclick="editNote({{ $note->id }})"
                                                  title="Edit Note">
                                              <i class="fas fa-edit text-primary"></i>
                                          </button>
+                                         @endif
+
+                                         @if(auth()->id() === $task->user_id)
                                          <button class="btn btn-light btn-sm rounded-circle" 
                                                  onclick="deleteNote({{ $note->id }})"
                                                  title="Delete Note">
                                              <i class="fas fa-trash text-danger"></i>
                                          </button>
+                                         @endif
                                      </div>
                                  </div>
                                  
@@ -1646,16 +1656,21 @@ data-priority="medium"
                                      
                                      <!-- Note Actions -->
                                      <div class="note-actions d-flex gap-2">
+                                        @if(auth()->id() === $task->user_id)
                                          <button class="btn btn-light btn-sm rounded-circle" 
                                                  onclick="editNote({{ $note->id }})"
                                                  title="Edit Note">
                                              <i class="fas fa-edit text-primary"></i>
                                          </button>
+                                         @endif
+
+                                         @if(auth()->id() === $task->user_id)
                                          <button class="btn btn-light btn-sm rounded-circle" 
                                                  onclick="deleteNote({{ $note->id }})"
                                                  title="Delete Note">
                                              <i class="fas fa-trash text-danger"></i>
                                          </button>
+                                         @endif
                                      </div>
                                  </div>
                           
@@ -2309,8 +2324,9 @@ data-priority="medium"
                                     <textarea name="description" class="form-control" rows="3" required>{{ $task->description }}</textarea>
                                 </div>
                             </div>
-    
-                           
+
+
+                             <!-- Task Image Section -->
 <div class="col-12 mt-3">
     <div class="form-group">
         <label class="form-label fw-bold text-primary">
@@ -2319,7 +2335,7 @@ data-priority="medium"
         
         @if($task->taskimage)
         <div class="current-image mb-2">
-            <img src="{{ Storage::url('taskimages/' . $task->taskimage) }}" 
+            <img src="{{ Storage::url('taskimages/' . basename($task->taskimage)) }}" 
                  alt="Task Image" 
                  class="img-thumbnail" 
                  style="max-width: 200px">
@@ -2331,14 +2347,20 @@ data-priority="medium"
             </button>
         </div>
         @endif
-
+        
+        <div class="form-text text-muted mb-2">
+            <i class="fas fa-info-circle"></i> 
+            Upload a new image or delete the existing one.
+        </div>
+        
         <input type="file" 
                name="taskimage" 
                class="form-control" 
                accept="image/*">
     </div>
 </div>
-
+    
+   
                             <!-- Priority, Status, Due Date -->
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -2506,9 +2528,11 @@ data-priority="medium"
                         <button type="button" class="btn btn-light px-4" data-dismiss="modal">
                             <i class="ti-close me-2"></i>Cancel
                         </button>
-                        <button type="submit" class="btn btn-danger px-4">
-                            <i class="ti-trash me-2"></i>Delete Task
-                        </button>
+                       
+                        <button type="submit" class="btn btn-danger px-4 delete-task-btn">
+    <i class="ti-trash me-2"></i>Delete Task
+</button>
+
                     </div>
                 </form>
             </div>

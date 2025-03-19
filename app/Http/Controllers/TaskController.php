@@ -73,15 +73,22 @@ public function update(Request $request, Task $task)
           
         ];
 
+     // Handle image upload or deletion
         if ($request->hasFile('taskimage')) {
+            // If a new image is uploaded, replace the old one
             if ($task->taskimage) {
-                Storage::delete('public/taskimages/' . $task->taskimage);
+                Storage::delete('public/taskimages/' . basename($task->taskimage));
             }
             
             $image = $request->file('taskimage');
             $filename = time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('public/taskimages', $filename);
             $updateData['taskimage'] = $filename;
+        } 
+        // Only delete the image if explicitly requested and no new image is uploaded
+        elseif ($request->has('delete_image') && $task->taskimage) {
+            Storage::delete('public/taskimages/' . basename($task->taskimage));
+            $updateData['taskimage'] = null;
         }
 
         $task->update($updateData);
@@ -92,7 +99,7 @@ public function update(Request $request, Task $task)
     }
 }
 
-
+/*
 public function deleteImage(Task $task)
 {
     try {
@@ -106,7 +113,7 @@ public function deleteImage(Task $task)
         return response()->json(['success' => false]);
     }
 }
-
+*/
 public function destroy(Task $task)
 {
     try {
@@ -165,18 +172,25 @@ public function updates(Request $request, Task $task)
             'user_id'     => $task->user_id
         ];
 
-        if ($request->hasFile('taskimage')) {
-            if ($task->taskimage) {
-                Storage::delete('public/taskimages/' . $task->taskimage);
-            }
-            
-            $image = $request->file('taskimage');
-            $filename = time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/taskimages', $filename);
-            $updateData['taskimage'] = $filename;
+       // Handle image upload or deletion
+       if ($request->hasFile('taskimage')) {
+        // If a new image is uploaded, replace the old one
+        if ($task->taskimage) {
+            Storage::delete('public/taskimages/' . basename($task->taskimage));
         }
+        
+        $image = $request->file('taskimage');
+        $filename = time() . '.' . $image->getClientOriginalExtension();
+        $image->storeAs('public/taskimages', $filename);
+        $updateData['taskimage'] = $filename;
+    } 
+    // Only delete the image if explicitly requested and no new image is uploaded
+    elseif ($request->has('delete_image') && $task->taskimage) {
+        Storage::delete('public/taskimages/' . basename($task->taskimage));
+        $updateData['taskimage'] = null;
+    }
 
-        $task->update($updateData);
+    $task->update($updateData);
 
         return redirect()->back()->with('success', 'Task updated successfully.');
 
@@ -261,7 +275,7 @@ public function getTasks()
     ]);
 }
 
-
+/*
 public function deleteImages(Task $task)
 {
     try {
@@ -275,7 +289,7 @@ public function deleteImages(Task $task)
         return response()->json(['success' => false]);
     }
 }
-
+*/
 public function stores(Request $request)
 {
     try {
