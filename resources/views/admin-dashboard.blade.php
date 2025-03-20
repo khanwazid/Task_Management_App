@@ -2140,31 +2140,7 @@ data-priority="medium"
                     </div>
                 </div>
 
-                {{--   <div class="col-12">
-                            <div class="form-group">
-                                <label class="form-label fw-bold text-primary">
-                                    <i class="ti-image me-2"></i>Task Image
-                                </label>
-                                <div class="modern-upload-container">
-                                    <div class="upload-area" id="uploadArea">
-                                        <input type="file" name="taskimage" id="taskimage" class="file-input" accept="image/*" hidden>
-                                        <div class="upload-content text-center">
-                                            <i class="ti-cloud-up display-4 mb-3"></i>
-                                            <h5 class="upload-title mb-2">Drag & Drop your image here</h5>
-                                            <p class="upload-subtitle mb-3">or</p>
-                                            <button type="button" class="btn btn-outline-primary btn-upload" onclick="document.getElementById('taskimage').click()">
-                                                <i class="ti-image me-2"></i>Browse Image
-                                            </button>
-                                        </div>
-                                        <div id="imagePreview" class="preview-container d-none">
-                                            <img src="" alt="Preview" class="preview-image">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
+              
 
                 <div class="modal-footer border-0 py-3">
                     <button type="button" class="btn btn-light" data-dismiss="modal">

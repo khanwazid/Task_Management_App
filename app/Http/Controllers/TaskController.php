@@ -99,21 +99,6 @@ public function update(Request $request, Task $task)
     }
 }
 
-/*
-public function deleteImage(Task $task)
-{
-    try {
-        if ($task->taskimage) {
-            Storage::delete('public/taskimages/' . $task->taskimage);
-            $task->update(['taskimage' => null]);
-            return response()->json(['success' => true]);
-        }
-        return response()->json(['success' => false]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false]);
-    }
-}
-*/
 public function destroy(Task $task)
 {
     try {
@@ -275,21 +260,6 @@ public function getTasks()
     ]);
 }
 
-/*
-public function deleteImages(Task $task)
-{
-    try {
-        if ($task->taskimage) {
-            Storage::delete('public/taskimages/' . $task->taskimage);
-            $task->update(['taskimage' => null]);
-            return response()->json(['success' => true]);
-        }
-        return response()->json(['success' => false]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false]);
-    }
-}
-*/
 public function stores(Request $request)
 {
     try {

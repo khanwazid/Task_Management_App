@@ -24,22 +24,6 @@ class TaskResource extends JsonResource
             'taskimage' => $this->taskimage ? asset('storage/' . $this->taskimage) : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-           // 'notes' => TaskNoteResource::collection($this->whenLoaded('notes')),
-          /* 'user' => [
-            'id' => $this->user->id,
-            'name' => $this->user->name,
-            'email' => $this->user->email,
-        ],
-        'notes' => $this->whenLoaded('notes', function() {
-            return $this->notes->map(function($note) {
-                return [
-                    'id' => $note->id,
-                    'content' => $note->content,
-                    'created_at' => $note->created_at
-                ];
-            });
-        }),
-        ];*/
         'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,

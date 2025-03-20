@@ -121,7 +121,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Logout successfully',
+                'message' => 'You have been Logout successfully',
             ], 200);
 
         } catch (\Exception $e) {

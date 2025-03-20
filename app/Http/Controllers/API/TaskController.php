@@ -75,14 +75,7 @@ class TaskController extends Controller
     public function update(Request $request, $id)
 {
     // Validate the request
-   /* $validator = Validator::make($request->all(), [
-        'title'       => 'sometimes|required|string|min:3|max:255',
-        'description' => 'sometimes|required|string|min:5|max:500',
-        'priority'    => 'sometimes|required|in:low,medium,high',
-        'status'      => 'sometimes|required|in:pending,in_progress,completed',
-        'due_date'    => 'sometimes|required|date',
-        'taskimage'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-    ]);*/
+  
  $validator = Validator::make($request->all(), [
         'title'       => 'required|string|min:3|max:255',
         'description' => 'required|string|min:5|max:500',
@@ -317,12 +310,7 @@ public function index(Request $request)
 
             $task->update($updateData);
 
-          /*  return response()->json([
-                'success' => true,
-                'message' => 'Task updated successfully.',
-                'data' => $task
-            ], 200);*/
-
+      
 
             return response()->json([
                 'success' => true,
