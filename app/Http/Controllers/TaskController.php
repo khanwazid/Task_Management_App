@@ -126,7 +126,11 @@ public function indexs()
         // Fetch tasks for all users and paginate the results
         $tasks = Task::latest()->paginate(20);
 
-        return view('admin-dashboard', compact('tasks'));
+        // Fetch all tasks for accurate statistics (not paginated)
+        $allTasks = Task::all();
+        return view('admin-dashboard', compact('tasks', 'allTasks'));
+
+       // return view('admin-dashboard', compact('tasks'));
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Something went wrong. Please try again.');
     }

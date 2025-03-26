@@ -226,191 +226,186 @@
                 </div>          
            
  <!-- High Priority Tasks -->
- 
  <div class="col-md-4">
-    
-     <div class="card shadow-sm h-100">
-         <div class="card-header bg-danger text-white">
-    <h5 class="mb-0">
-<i class="fas fa-bolt text-warning fa-pulse"></i> High Priority
-</h5>
-         </div>
-       
-         
-         <div class="filter-section p-3 border-bottom bg-light">
-             <div class="search-wrapper mb-3">
-                 <div class="input-group">
-                     <span class="input-group-text border-end-0 bg-white">
-                         <i class="fas fa-search text-primary"></i>
-                     </span>
-                     <input type="text" 
-                            class="form-control border-start-0 ps-0 task-search" 
-                              placeholder="Search tasks by title or description..."
-                            data-priority="high"
-                     >
-                 </div>
-             </div>
-         
-             <div class="d-flex gap-2 flex-wrap">
-                 <div class="filter-group">
-                     <select class="form-select form-select-sm status-filter" data-priority="high">
-                         <option value="">All Status</option>
-                         <option value="pending">Pending</option>
-                         <option value="in_progress">In Progress</option>
-                         <option value="completed">Completed</option>
-                     </select>
-                 </div>
-                 <div class="filter-group">
-                     <select class="form-select form-select-sm date-filter" data-priority="high">
-                         <option value="">All Dates</option>
-                         <option value="today">Due Today</option>
-                         <option value="tomorrow">Due Tomorrow</option>
-                         <option value="week">This Week</option>
-                         <option value="overdue">Overdue</option>
-                     </select>
-                 </div>
-             </div>
-         </div>
-         <div class="card-body">
-             @php
-             $highPriorityTasks = $tasks->where('priority', 'high');
-             $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
-
-              // Statistics calculations
-    $totalTasks = $highPriorityTasks->count();
-    $pendingTasks = $highPriorityTasks->where('status', 'pending')->count();
-    $inProgressTasks = $highPriorityTasks->where('status', 'in_progress')->count();
-    $completedTasks = $highPriorityTasks->where('status', 'completed')->count();
-    
-    $dueTodayTasks = $highPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
-    $dueThisWeekTasks = $highPriorityTasks->filter(fn($task) => 
-        $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
-    )->count();
-    $overdueTasks = $highPriorityTasks->filter(fn($task) => 
-        $task->due_date->isPast() && $task->status !== 'completed'
-    )->count();
-
-    // Progress calculations
-    $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
-    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
-    $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
-         @endphp
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-bolt text-warning fa-pulse"></i> High Priority
+            </h5>
+        </div>
         
-       
+        <div class="filter-section p-3 border-bottom bg-light">
+            <div class="search-wrapper mb-3">
+                <div class="input-group">
+                    <span class="input-group-text border-end-0 bg-white">
+                        <i class="fas fa-search text-primary"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control border-start-0 ps-0 task-search" 
+                           placeholder="Search tasks by title or description..."
+                           data-priority="high">
+                </div>
+            </div>
         
-<div class="total-tasks-counter mb-3 text-center">
-    <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="text-white-50">Total Tasks</h2>
-                <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+            <div class="d-flex gap-2 flex-wrap">
+                <div class="filter-group">
+                    <select class="form-select form-select-sm status-filter" data-priority="high">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select class="form-select form-select-sm date-filter" data-priority="high">
+                        <option value="">All Dates</option>
+                        <option value="today">Due Today</option>
+                        <option value="tomorrow">Due Tomorrow</option>
+                        <option value="week">This Week</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @php
+                // For display in the list - paginated
+                $highPriorityTasks = $tasks->where('priority', 'high');
+                $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
                 
-            </div>
-            <div class="display-4">
-               <i class="fas fa-file-signature"></i> 
-</div>
-        </div>
-    </div>
-</div>
-
-
-<div class="statistics-section p-3 border-bottom">
-    <div class="row g-3">
-        <!-- Status Statistics -->
-        <div class="col-md-6">
-            <div class="stats-card bg-light rounded p-3">
-                <h6 class="mb-3 text-primary">
-                    <i class="fas fa-chart-pie me-2"></i>Status Breakdown
-                </h6>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Pending</span>
-                        <span class="badge bg-danger rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'pending')->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">In Progress</span>
-                        <span class="badge bg-warning rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'in_progress')->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Completed</span>
-                        <span class="badge bg-success rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'completed')->count() }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Due Date Statistics -->
-        <div class="col-md-6">
-            <div class="stats-card bg-light rounded p-3">
-                <h6 class="mb-3 text-primary">
-                    <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
-                </h6>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Due Today</span>
-                        <span class="badge bg-info rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->isToday(); 
-                            })->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Due This Week</span>
-                        <span class="badge bg-primary rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
-                            })->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Overdue</span>
-                        <span class="badge bg-danger rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->isPast() && $task->status !== 'completed'; 
-                            })->count() }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Overall Progress -->
-        <div class="col-12">
-            <div class="progress" style="height: 25px;">
-                @php
-                    $total = $highPriorityTasks->count();
-                    $completed = $highPriorityTasks->where('status', 'completed')->count();
-                    $inProgress = $highPriorityTasks->where('status', 'in_progress')->count();
-                    $pending = $highPriorityTasks->where('status', 'pending')->count();
-                    
-                    $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
-                    $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
-                    $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
-                @endphp
+                // For statistics - all tasks regardless of pagination
+                $allHighPriorityTasks = $allTasks->where('priority', 'high');
                 
-                <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
-                     title="Completed: {{ $completed }}">
-                    {{ round($completedPercentage) }}%
-                </div>
-                <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
-                     title="In Progress: {{ $inProgress }}">
-                    {{ round($inProgressPercentage) }}%
-                </div>
-                <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
-                     title="Pending: {{ $pending }}">
-                    {{ round($pendingPercentage) }}%
+                // Statistics calculations using all tasks
+                $totalTasks = $allHighPriorityTasks->count();
+                $pendingTasks = $allHighPriorityTasks->where('status', 'pending')->count();
+                $inProgressTasks = $allHighPriorityTasks->where('status', 'in_progress')->count();
+                $completedTasks = $allHighPriorityTasks->where('status', 'completed')->count();
+                
+                $dueTodayTasks = $allHighPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
+                $dueThisWeekTasks = $allHighPriorityTasks->filter(fn($task) => 
+                    $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
+                )->count();
+                $overdueTasks = $allHighPriorityTasks->filter(fn($task) => 
+                    $task->due_date->isPast() && $task->status !== 'completed'
+                )->count();
+                
+                // Progress calculations
+                $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+                $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
+                $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
+            @endphp
+            
+            <div class="total-tasks-counter mb-3 text-center">
+                <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="text-white-50">Total Tasks</h2>
+                            <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-file-signature"></i> 
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
+            <div class="statistics-section p-3 border-bottom">
+                <div class="row g-3">
+                    <!-- Status Statistics -->
+                    <div class="col-md-6">
+                        <div class="stats-card bg-light rounded p-3">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-chart-pie me-2"></i>Status Breakdown
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Pending</span>
+                                    <span class="badge bg-danger rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'pending')->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">In Progress</span>
+                                    <span class="badge bg-warning rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'in_progress')->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Completed</span>
+                                    <span class="badge bg-success rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'completed')->count() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Due Date Statistics -->
+                    <div class="col-md-6">
+                        <div class="stats-card bg-light rounded p-3">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Due Today</span>
+                                    <span class="badge bg-info rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->isToday(); 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Due This Week</span>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Overdue</span>
+                                    <span class="badge bg-danger rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->isPast() && $task->status !== 'completed'; 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Progress -->
+                    <div class="col-12">
+                        <div class="progress" style="height: 25px;">
+                            @php
+                                $total = $allHighPriorityTasks->count();
+                                $completed = $allHighPriorityTasks->where('status', 'completed')->count();
+                                $inProgress = $allHighPriorityTasks->where('status', 'in_progress')->count();
+                                $pending = $allHighPriorityTasks->where('status', 'pending')->count();
+                                
+                                $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
+                                $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
+                                $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
+                            @endphp
+                            
+                            <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
+                                 title="Completed: {{ $completed }}">
+                                {{ round($completedPercentage) }}%
+                            </div>
+                            <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
+                                 title="In Progress: {{ $inProgress }}">
+                                {{ round($inProgressPercentage) }}%
+                            </div>
+                            <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
+                                 title="Pending: {{ $pending }}">
+                                {{ round($pendingPercentage) }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
          
          @forelse($highPriorityTasks as $index => $task)
              <div class="task-card mb-3 p-3 border rounded hover-shadow">
@@ -768,188 +763,186 @@
 
  <!-- Medium Priority Tasks -->
  <div class="col-md-4">
-     <div class="card shadow-sm h-100">
-         <div class="card-header bg-warning text-white">
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-warning text-white">
       
-<h5 class="mb-0">
-<i class="fas fa-hourglass-half text-dark fa-spin"></i> Medium Priority
-</h5>              
-</div>
-<div class="filter-section p-3 border-bottom bg-light">
-<div class="search-wrapper mb-3">
-<div class="input-group">
-<span class="input-group-text border-end-0 bg-white">
-<i class="fas fa-search text-primary"></i>
-</span>
-<input type="text" 
-class="form-control border-start-0 ps-0 task-search" 
-  placeholder="Search tasks by title or description..."
-data-priority="medium"
->
-</div>
-</div>
-
-<div class="d-flex gap-2 flex-wrap">
-<div class="filter-group">
-<select class="form-select form-select-sm status-filter" data-priority="medium">
-<option value="">All Status</option>
-<option value="pending">Pending</option>
-<option value="in_progress">In Progress</option>
-<option value="completed">Completed</option>
-</select>
-</div>
-<div class="filter-group">
-<select class="form-select form-select-sm date-filter" data-priority="medium">
-<option value="">All Dates</option>
-<option value="today">Due Today</option>
-<option value="tomorrow">Due Tomorrow</option>
-<option value="week">This Week</option>
-<option value="overdue">Overdue</option>
-</select>
-</div>
-</div>
-</div>
-<div class="card-body">
-
-
-             @php
-             $highPriorityTasks = $tasks->where('priority', 'medium');
-             $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
-              // Statistics calculations
-    $totalTasks = $highPriorityTasks->count();
-    $pendingTasks = $highPriorityTasks->where('status', 'pending')->count();
-    $inProgressTasks = $highPriorityTasks->where('status', 'in_progress')->count();
-    $completedTasks = $highPriorityTasks->where('status', 'completed')->count();
-    
-    $dueTodayTasks = $highPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
-    $dueThisWeekTasks = $highPriorityTasks->filter(fn($task) => 
-        $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
-    )->count();
-    $overdueTasks = $highPriorityTasks->filter(fn($task) => 
-        $task->due_date->isPast() && $task->status !== 'completed'
-    )->count();
-
-    // Progress calculations
-    $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
-    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
-    $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
-         @endphp
+            <h5 class="mb-0">
+            <i class="fas fa-hourglass-half text-dark fa-spin"></i> Medium Priority
+            </h5>              
+            </div>
         
-         
+        <div class="filter-section p-3 border-bottom bg-light">
+            <div class="search-wrapper mb-3">
+                <div class="input-group">
+                    <span class="input-group-text border-end-0 bg-white">
+                        <i class="fas fa-search text-primary"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control border-start-0 ps-0 task-search" 
+                           placeholder="Search tasks by title or description..."
+                           data-priority="medium">
+                </div>
+            </div>
         
-<div class="total-tasks-counter mb-3 text-center">
-    <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="text-white-50">Total Tasks</h2>
-                <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+            <div class="d-flex gap-2 flex-wrap">
+                <div class="filter-group">
+                    <select class="form-select form-select-sm status-filter" data-priority="medium">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select class="form-select form-select-sm date-filter" data-priority="medium">
+                        <option value="">All Dates</option>
+                        <option value="today">Due Today</option>
+                        <option value="tomorrow">Due Tomorrow</option>
+                        <option value="week">This Week</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @php
+                // For display in the list - paginated
+                $highPriorityTasks = $tasks->where('priority', 'medium');
+                $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
                 
-            </div>
-            <div class="display-4">
-                <i class="fas fa-file-signature"></i> 
-            </div>
-        </div>
-    </div>
-</div>
-
-
-      
-<div class="statistics-section p-3 border-bottom">
-    <div class="row g-3">
-        <!-- Status Statistics -->
-        <div class="col-md-6">
-            <div class="stats-card bg-light rounded p-3">
-                <h6 class="mb-3 text-primary">
-                    <i class="fas fa-chart-pie me-2"></i>Status Breakdown
-                </h6>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Pending</span>
-                        <span class="badge bg-danger rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'pending')->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">In Progress</span>
-                        <span class="badge bg-warning rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'in_progress')->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Completed</span>
-                        <span class="badge bg-success rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'completed')->count() }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Due Date Statistics -->
-        <div class="col-md-6">
-            <div class="stats-card bg-light rounded p-3">
-                <h6 class="mb-3 text-primary">
-                    <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
-                </h6>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Due Today</span>
-                        <span class="badge bg-info rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->isToday(); 
-                            })->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Due This Week</span>
-                        <span class="badge bg-primary rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
-                            })->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Overdue</span>
-                        <span class="badge bg-danger rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->isPast() && $task->status !== 'completed'; 
-                            })->count() }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Overall Progress -->
-        <div class="col-12">
-            <div class="progress" style="height: 25px;">
-                @php
-                    $total = $highPriorityTasks->count();
-                    $completed = $highPriorityTasks->where('status', 'completed')->count();
-                    $inProgress = $highPriorityTasks->where('status', 'in_progress')->count();
-                    $pending = $highPriorityTasks->where('status', 'pending')->count();
-                    
-                    $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
-                    $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
-                    $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
-                @endphp
+                // For statistics - all tasks regardless of pagination
+                $allHighPriorityTasks = $allTasks->where('priority', 'medium');
                 
-                <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
-                     title="Completed: {{ $completed }}">
-                    {{ round($completedPercentage) }}%
-                </div>
-                <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
-                     title="In Progress: {{ $inProgress }}">
-                    {{ round($inProgressPercentage) }}%
-                </div>
-                <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
-                     title="Pending: {{ $pending }}">
-                    {{ round($pendingPercentage) }}%
+                // Statistics calculations using all tasks
+                $totalTasks = $allHighPriorityTasks->count();
+                $pendingTasks = $allHighPriorityTasks->where('status', 'pending')->count();
+                $inProgressTasks = $allHighPriorityTasks->where('status', 'in_progress')->count();
+                $completedTasks = $allHighPriorityTasks->where('status', 'completed')->count();
+                
+                $dueTodayTasks = $allHighPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
+                $dueThisWeekTasks = $allHighPriorityTasks->filter(fn($task) => 
+                    $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
+                )->count();
+                $overdueTasks = $allHighPriorityTasks->filter(fn($task) => 
+                    $task->due_date->isPast() && $task->status !== 'completed'
+                )->count();
+                
+                // Progress calculations
+                $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+                $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
+                $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
+            @endphp
+            
+            <div class="total-tasks-counter mb-3 text-center">
+                <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="text-white-50">Total Tasks</h2>
+                            <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-file-signature"></i> 
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+
+            <div class="statistics-section p-3 border-bottom">
+                <div class="row g-3">
+                    <!-- Status Statistics -->
+                    <div class="col-md-6">
+                        <div class="stats-card bg-light rounded p-3">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-chart-pie me-2"></i>Status Breakdown
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Pending</span>
+                                    <span class="badge bg-danger rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'pending')->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">In Progress</span>
+                                    <span class="badge bg-warning rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'in_progress')->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Completed</span>
+                                    <span class="badge bg-success rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'completed')->count() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Due Date Statistics -->
+                    <div class="col-md-6">
+                        <div class="stats-card bg-light rounded p-3">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Due Today</span>
+                                    <span class="badge bg-info rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->isToday(); 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Due This Week</span>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Overdue</span>
+                                    <span class="badge bg-danger rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->isPast() && $task->status !== 'completed'; 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Progress -->
+                    <div class="col-12">
+                        <div class="progress" style="height: 25px;">
+                            @php
+                                $total = $allHighPriorityTasks->count();
+                                $completed = $allHighPriorityTasks->where('status', 'completed')->count();
+                                $inProgress = $allHighPriorityTasks->where('status', 'in_progress')->count();
+                                $pending = $allHighPriorityTasks->where('status', 'pending')->count();
+                                
+                                $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
+                                $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
+                                $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
+                            @endphp
+                            
+                            <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
+                                 title="Completed: {{ $completed }}">
+                                {{ round($completedPercentage) }}%
+                            </div>
+                            <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
+                                 title="In Progress: {{ $inProgress }}">
+                                {{ round($inProgressPercentage) }}%
+                            </div>
+                            <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
+                                 title="Pending: {{ $pending }}">
+                                {{ round($pendingPercentage) }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
          
          @forelse($highPriorityTasks as $index => $task)
@@ -1299,186 +1292,185 @@ data-priority="medium"
 
  <!-- Low Priority Tasks -->
  <div class="col-md-4">
-     <div class="card shadow-sm h-100">
-         <div class="card-header bg-info text-white">
-           <h5 class="mb-0">
-<i class="fas fa-clock text-secondary fa-spin"></i> Low Priority
-</h5>
-         </div>
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+ <i class="fas fa-clock text-secondary fa-spin"></i> Low Priority
+ </h5>
+          </div>
         
-         <div class="filter-section p-3 border-bottom bg-light">
-             <div class="search-wrapper mb-3">
-                 <div class="input-group">
-                     <span class="input-group-text border-end-0 bg-white">
-                         <i class="fas fa-search text-primary"></i>
-                     </span>
-                     <input type="text" 
-                            class="form-control border-start-0 ps-0 task-search" 
-                             placeholder="Search tasks by title or description..."
-                            data-priority="low"
-                     >
-                 </div>
-             </div>
-         
-             <div class="d-flex gap-2 flex-wrap">
-                 <div class="filter-group">
-                     <select class="form-select form-select-sm status-filter" data-priority="low">
-                         <option value="">All Status</option>
-                         <option value="pending">Pending</option>
-                         <option value="in_progress">In Progress</option>
-                         <option value="completed">Completed</option>
-                     </select>
-                 </div>
-                 <div class="filter-group">
-                     <select class="form-select form-select-sm date-filter" data-priority="low">
-                         <option value="">All Dates</option>
-                         <option value="today">Due Today</option>
-                         <option value="tomorrow">Due Tomorrow</option>
-                         <option value="week">This Week</option>
-                         <option value="overdue">Overdue</option>
-                     </select>
-                 </div>
-             </div>
-         </div>
-         <div class="card-body">
+        <div class="filter-section p-3 border-bottom bg-light">
+            <div class="search-wrapper mb-3">
+                <div class="input-group">
+                    <span class="input-group-text border-end-0 bg-white">
+                        <i class="fas fa-search text-primary"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control border-start-0 ps-0 task-search" 
+                           placeholder="Search tasks by title or description..."
+                           data-priority="low">
+                </div>
+            </div>
+        
+            <div class="d-flex gap-2 flex-wrap">
+                <div class="filter-group">
+                    <select class="form-select form-select-sm status-filter" data-priority="low">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select class="form-select form-select-sm date-filter" data-priority="low">
+                        <option value="">All Dates</option>
+                        <option value="today">Due Today</option>
+                        <option value="tomorrow">Due Tomorrow</option>
+                        <option value="week">This Week</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @php
+                // For display in the list - paginated
+                $highPriorityTasks = $tasks->where('priority', 'low');
+                $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
+                
+                // For statistics - all tasks regardless of pagination
+                $allHighPriorityTasks = $allTasks->where('priority', 'low');
+                
+                // Statistics calculations using all tasks
+                $totalTasks = $allHighPriorityTasks->count();
+                $pendingTasks = $allHighPriorityTasks->where('status', 'pending')->count();
+                $inProgressTasks = $allHighPriorityTasks->where('status', 'in_progress')->count();
+                $completedTasks = $allHighPriorityTasks->where('status', 'completed')->count();
+                
+                $dueTodayTasks = $allHighPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
+                $dueThisWeekTasks = $allHighPriorityTasks->filter(fn($task) => 
+                    $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
+                )->count();
+                $overdueTasks = $allHighPriorityTasks->filter(fn($task) => 
+                    $task->due_date->isPast() && $task->status !== 'completed'
+                )->count();
+                
+                // Progress calculations
+                $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+                $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
+                $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
+            @endphp
             
-             @php
-             $highPriorityTasks = $tasks->where('priority', 'low');
-             $startingNumber = ($tasks->currentPage() - 1) * $tasks->perPage();
-               // Statistics calculations
-    $totalTasks = $highPriorityTasks->count();
-    $pendingTasks = $highPriorityTasks->where('status', 'pending')->count();
-    $inProgressTasks = $highPriorityTasks->where('status', 'in_progress')->count();
-    $completedTasks = $highPriorityTasks->where('status', 'completed')->count();
-    
-    $dueTodayTasks = $highPriorityTasks->filter(fn($task) => $task->due_date->isToday())->count();
-    $dueThisWeekTasks = $highPriorityTasks->filter(fn($task) => 
-        $task->due_date->between(now()->startOfWeek(), now()->endOfWeek())
-    )->count();
-    $overdueTasks = $highPriorityTasks->filter(fn($task) => 
-        $task->due_date->isPast() && $task->status !== 'completed'
-    )->count();
-
-    // Progress calculations
-    $completedPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
-    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0;
-    $pendingPercentage = $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0;
-         @endphp
-        
-        
-<div class="total-tasks-counter mb-3 text-center">
-    <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="text-white-50">Total Tasks</h2>
-                <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
-                
-            </div>
-            <div class="display-4">
-                <i class="fas fa-file-signature"></i> 
-            </div>
-        </div>
-    </div>
-</div>
-
-
-       
-<div class="statistics-section p-3 border-bottom">
-    <div class="row g-3">
-        <!-- Status Statistics -->
-        <div class="col-md-6">
-            <div class="stats-card bg-light rounded p-3">
-                <h6 class="mb-3 text-primary">
-                    <i class="fas fa-chart-pie me-2"></i>Status Breakdown
-                </h6>
-                <div class="d-flex flex-column gap-2">
+            <div class="total-tasks-counter mb-3 text-center">
+                <div class="card bg-primary bg-gradient text-white p-3 rounded-4">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Pending</span>
-                        <span class="badge bg-danger rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'pending')->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">In Progress</span>
-                        <span class="badge bg-warning rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'in_progress')->count() }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Completed</span>
-                        <span class="badge bg-success rounded-pill">
-                            {{ $highPriorityTasks->where('status', 'completed')->count() }}
-                        </span>
+                        <div>
+                            <h2 class="text-white-50">Total Tasks</h2>
+                            <h3 class="mb-0 fw-bold">{{ $totalTasks }}</h3>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-file-signature"></i> 
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Due Date Statistics -->
-        <div class="col-md-6">
-            <div class="stats-card bg-light rounded p-3">
-                <h6 class="mb-3 text-primary">
-                    <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
-                </h6>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Due Today</span>
-                        <span class="badge bg-info rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->isToday(); 
-                            })->count() }}
-                        </span>
+            <div class="statistics-section p-3 border-bottom">
+                <div class="row g-3">
+                    <!-- Status Statistics -->
+                    <div class="col-md-6">
+                        <div class="stats-card bg-light rounded p-3">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-chart-pie me-2"></i>Status Breakdown
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Pending</span>
+                                    <span class="badge bg-danger rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'pending')->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">In Progress</span>
+                                    <span class="badge bg-warning rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'in_progress')->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Completed</span>
+                                    <span class="badge bg-success rounded-pill">
+                                        {{ $allHighPriorityTasks->where('status', 'completed')->count() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Due This Week</span>
-                        <span class="badge bg-primary rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
-                            })->count() }}
-                        </span>
+
+                    <!-- Due Date Statistics -->
+                    <div class="col-md-6">
+                        <div class="stats-card bg-light rounded p-3">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-calendar-check me-2"></i>Due Date Analysis
+                            </h6>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Due Today</span>
+                                    <span class="badge bg-info rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->isToday(); 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Due This Week</span>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->between(now()->startOfWeek(), now()->endOfWeek()); 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Overdue</span>
+                                    <span class="badge bg-danger rounded-pill">
+                                        {{ $allHighPriorityTasks->filter(function($task) { 
+                                            return $task->due_date->isPast() && $task->status !== 'completed'; 
+                                        })->count() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted">Overdue</span>
-                        <span class="badge bg-danger rounded-pill">
-                            {{ $highPriorityTasks->filter(function($task) { 
-                                return $task->due_date->isPast() && $task->status !== 'completed'; 
-                            })->count() }}
-                        </span>
+
+                    <!-- Overall Progress -->
+                    <div class="col-12">
+                        <div class="progress" style="height: 25px;">
+                            @php
+                                $total = $allHighPriorityTasks->count();
+                                $completed = $allHighPriorityTasks->where('status', 'completed')->count();
+                                $inProgress = $allHighPriorityTasks->where('status', 'in_progress')->count();
+                                $pending = $allHighPriorityTasks->where('status', 'pending')->count();
+                                
+                                $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
+                                $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
+                                $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
+                            @endphp
+                            
+                            <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
+                                 title="Completed: {{ $completed }}">
+                                {{ round($completedPercentage) }}%
+                            </div>
+                            <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
+                                 title="In Progress: {{ $inProgress }}">
+                                {{ round($inProgressPercentage) }}%
+                            </div>
+                            <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
+                                 title="Pending: {{ $pending }}">
+                                {{ round($pendingPercentage) }}%
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Overall Progress -->
-        <div class="col-12">
-            <div class="progress" style="height: 25px;">
-                @php
-                    $total = $highPriorityTasks->count();
-                    $completed = $highPriorityTasks->where('status', 'completed')->count();
-                    $inProgress = $highPriorityTasks->where('status', 'in_progress')->count();
-                    $pending = $highPriorityTasks->where('status', 'pending')->count();
-                    
-                    $completedPercentage = $total > 0 ? ($completed / $total) * 100 : 0;
-                    $inProgressPercentage = $total > 0 ? ($inProgress / $total) * 100 : 0;
-                    $pendingPercentage = $total > 0 ? ($pending / $total) * 100 : 0;
-                @endphp
-                
-                <div class="progress-bar bg-success" style="width: {{ $completedPercentage }}%" 
-                     title="Completed: {{ $completed }}">
-                    {{ round($completedPercentage) }}%
-                </div>
-                <div class="progress-bar bg-warning" style="width: {{ $inProgressPercentage }}%"
-                     title="In Progress: {{ $inProgress }}">
-                    {{ round($inProgressPercentage) }}%
-                </div>
-                <div class="progress-bar bg-danger" style="width: {{ $pendingPercentage }}%"
-                     title="Pending: {{ $pending }}">
-                    {{ round($pendingPercentage) }}%
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
          @forelse($highPriorityTasks as $index => $task)
              <div class="task-card mb-3 p-3 border rounded hover-shadow">

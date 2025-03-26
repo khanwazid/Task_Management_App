@@ -19,6 +19,53 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class TaskNoteController extends Controller
 {
     public function store(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'task_id' => 'required|exists:tasks,id',
+            'content' => 'required|string|min:5|max:1000'
+        ]);
+
+        // Get the task
+        $task = Task::findOrFail($validated['task_id']);
+        
+        // Check if the authenticated user owns this task
+        if ($task->user_id !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to add notes to this task.'
+            ], 403);
+        }
+
+        $taskNote = TaskNote::create([
+            'task_id' => $validated['task_id'],
+            'user_id' => auth()->id(),
+            'content' => $validated['content']
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Note added successfully.',
+            'data' => $taskNote
+        ], 201);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation failed.',
+            'errors' => $e->errors()
+        ], 422);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'An unexpected error occurred. Please try again later.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+   /* public function store(Request $request)
     {
         try {
             $validated = $request->validate([
@@ -52,7 +99,7 @@ class TaskNoteController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
+    }*/
     public function update(Request $request, $id)
 {
     try {
