@@ -1010,129 +1010,111 @@ function deleteProfileImage() {
         }
     }
     
-   
-        document.addEventListener('DOMContentLoaded', function() {
-        // Initialize search and filter functionality for each priority section
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize filters for all priority sections
         ['high', 'medium', 'low'].forEach(priority => {
-            initializeTaskFilters(priority);
+            initializePriorityFilters(priority);
         });
     });
     
-    function initializeTaskFilters(priority) {
-        const container = document.querySelector(`[data-priority="${priority}"]`).closest('.card');
-        const searchInput = container.querySelector('.task-search');
-        const statusFilter = container.querySelector('.status-filter');
-        const dateFilter = container.querySelector('.date-filter');
-        const taskCards = container.querySelectorAll('.task-card');
+    function initializePriorityFilters(priority) {
+        const container = document.querySelector(`[data-priority="${priority}"]`)?.closest('.card');
+        if (!container) return;
     
-        // Debounce search function
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterTasks();
+        // Find all filter elements
+        const form = container.querySelector('form');
+        const searchInput = container.querySelector('.task-search, input[name="search"]');
+        const statusFilter = container.querySelector('.status-filter, select[name="status"]');
+        const dateFilter = container.querySelector('.date-filter, select[name="date"]');
+        
+        if (!searchInput || !statusFilter || !dateFilter) return;
+    
+        // Add hidden priority field if it doesn't exist
+        if (form && !form.querySelector('input[name="priority"]')) {
+            const priorityInput = document.createElement('input');
+            priorityInput.type = 'hidden';
+            priorityInput.name = 'priority';
+            priorityInput.value = priority;
+            form.appendChild(priorityInput);
+        }
+    
+        // Set up event listeners
+        setupFilterEvents({
+            container,
+            form,
+            searchInput,
+            statusFilter,
+            dateFilter,
+            priority
+        });
+    }
+    
+    function setupFilterEvents({container, form, searchInput, statusFilter, dateFilter, priority}) {
+        // Debounce variables
+        let searchDebounce;
+        let submitDebounce;
+    
+        // Common submit handler
+        const handleFilterChange = () => {
+            clearTimeout(submitDebounce);
+            submitDebounce = setTimeout(() => {
+                if (form) {
+                    form.submit();
+                } else {
+                    submitStandaloneFilters(priority, searchInput.value, statusFilter.value, dateFilter.value);
+                }
             }, 300);
+        };
+    
+        // Search input
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(handleFilterChange, 500);
         });
     
-        // Add change listeners to filters
-        statusFilter.addEventListener('change', filterTasks);
-        dateFilter.addEventListener('change', filterTasks);
+        // Status filter
+        statusFilter.addEventListener('change', handleFilterChange);
     
-        function filterTasks() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const statusValue = statusFilter.value;
-            const dateValue = dateFilter.value;
+        // Date filter
+        dateFilter.addEventListener('change', handleFilterChange);
     
-            taskCards.forEach(card => {
-                const title = card.querySelector('.task-title').textContent.toLowerCase();
-                const description = card.querySelector('.task-description').textContent.toLowerCase();
-                const status = card.querySelector('.status-badge').textContent.trim().toLowerCase().replace(' ', '_');
-                const dateText = card.querySelector('.date-badge').textContent.trim();
-                const date = new Date(dateText);
-    
-                let showCard = true;
-    
-                // Search filter
-                if (searchTerm) {
-                    showCard = title.includes(searchTerm) || description.includes(searchTerm);
-                }
-    
-                // Status filter
-                if (showCard && statusValue) {
-                    showCard = status === statusValue;
-                }
-    
-                // Date filter
-                if (showCard && dateValue) {
-                    const today = new Date();
-                    const tomorrow = new Date(today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-                    switch (dateValue) {
-                        case 'today':
-                            showCard = isSameDay(date, today);
-                            break;
-                        case 'tomorrow':
-                            showCard = isSameDay(date, tomorrow);
-                            break;
-                        case 'week':
-                            showCard = isThisWeek(date);
-                            break;
-                        case 'overdue':
-                            showCard = date < today;
-                            break;
-                    }
-                }
-    
-                // Show/hide card with animation
-                if (showCard) {
-                    card.style.display = 'block';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
+        // Clear filters button if exists
+        const clearButton = container.querySelector('.clear-filters');
+        if (clearButton) {
+            clearButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (form) {
+                    // Reset form inputs
+                    form.querySelectorAll('input[name="search"], select[name="status"], select[name="date"]').forEach(input => {
+                        if (input.tagName === 'SELECT') {
+                            input.selectedIndex = 0;
+                        } else {
+                            input.value = '';
+                        }
+                    });
+                    form.submit();
                 } else {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(-10px)';
-                    setTimeout(() => {
-                        card.style.display = 'none';
-                    }, 300);
+                    // For standalone filters
+                    searchInput.value = '';
+                    statusFilter.selectedIndex = 0;
+                    dateFilter.selectedIndex = 0;
+                    submitStandaloneFilters(priority, '', '', '');
                 }
             });
-    
-            // Show empty state if no results
-            const visibleCards = Array.from(taskCards).filter(card => card.style.display !== 'none');
-            const emptyState = container.querySelector('.empty-state') || createEmptyState();
-            
-            if (visibleCards.length === 0) {
-                container.querySelector('.card-body').appendChild(emptyState);
-                emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-            }
         }
     }
     
-    // Helper functions
-    function isSameDay(date1, date2) {
-        return date1.getDate() === date2.getDate() &&
-               date1.getMonth() === date2.getMonth() &&
-               date1.getFullYear() === date2.getFullYear();
-    }
-    
-    function isThisWeek(date) {
-        const today = new Date();
-        const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
-        const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6));
-        return date >= weekStart && date <= weekEnd;
-    }
-    
-    function createEmptyState() {
-        const div = document.createElement('div');
-        div.className = 'empty-state text-center py-4';
-        div.innerHTML = `
-            <i class="fas fa-filter fa-2x text-muted mb-2"></i>
-            <p class="text-muted">No tasks match your filters</p>
-        `;
-        return div;
+    function submitStandaloneFilters(priority, search, status, date) {
+        const params = new URLSearchParams();
+        
+        // Set parameters
+        params.set('priority', priority);
+        if (search) params.set('search', search);
+        if (status) params.set('status', status);
+        if (date) params.set('date', date);
+        
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+        
     }
     
    

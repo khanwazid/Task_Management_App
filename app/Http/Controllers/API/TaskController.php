@@ -262,7 +262,85 @@ public function index(Request $request)
 
                                   //ADMIN SECTION
 
-    
+                                  public function indexs(Request $request)
+                                  {
+                                      try {
+                                          if (auth()->user()->role !== 'admin') {
+                                              return redirect()->back()->with('error', 'You do not have permission to view all tasks.');
+                                          }
+                                          
+                                          $allTasks = Task::all(); // For statistics
+                                          
+                                          // Get the active priority tab (default to 'all' if not specified)
+                                          $activePriority = $request->input('priority_tab', 'all');
+                                          
+                                          // Base query with common filters
+                                          $baseQuery = Task::query();
+                                          
+                                          // Apply filters based on active priority tab
+                                          if ($activePriority !== 'all') {
+                                              // Search filter
+                                              if ($request->filled($activePriority.'_search')) {
+                                                  $searchTerm = $request->input($activePriority.'_search');
+                                                  $baseQuery->where(function($q) use ($searchTerm) {
+                                                      $q->where('title', 'like', '%'.$searchTerm.'%')
+                                                        ->orWhere('description', 'like', '%'.$searchTerm.'%');
+                                                  });
+                                              }
+                                              
+                                              // Status filter
+                                              if ($request->filled($activePriority.'_status')) {
+                                                  $baseQuery->where('status', $request->input($activePriority.'_status'));
+                                              }
+                                  
+                                              // Date filter
+                                              if ($request->filled($activePriority.'_date')) {
+                                                  $priorityDate = $request->input($activePriority.'_date');
+                                                  $today = now()->startOfDay();
+                                                  $tomorrow = now()->addDay()->startOfDay();
+                                                  $weekStart = now()->startOfWeek();
+                                                  $weekEnd = now()->endOfWeek();
+                                                  
+                                                  switch ($priorityDate) {
+                                                      case 'today':
+                                                          $baseQuery->whereDate('due_date', '=', $today);
+                                                          break;
+                                                      case 'tomorrow':
+                                                          $baseQuery->whereDate('due_date', '=', $tomorrow);
+                                                          break;
+                                                      case 'week':
+                                                          $baseQuery->whereBetween('due_date', [$weekStart, $weekEnd]);
+                                                          break;
+                                                      case 'overdue':
+                                                          $baseQuery->whereDate('due_date', '<', $today)
+                                                                   ->where('status', '!=', 'completed');
+                                                          break;
+                                                  }
+                                              }
+                                              
+                                              // Filter by priority
+                                              $baseQuery->where('priority', $activePriority);
+                                          }
+                                          
+                                          // Get tasks for each priority
+                                          $highPriorityTasks = (clone $baseQuery)->where('priority', 'high')->latest()->paginate(10, ['*'], 'high');
+                                          $mediumPriorityTasks = (clone $baseQuery)->where('priority', 'medium')->latest()->paginate(10, ['*'], 'medium');
+                                          $lowPriorityTasks = (clone $baseQuery)->where('priority', 'low')->latest()->paginate(10, ['*'], 'low');
+                                          
+                                          return view('admin-dashboard', [
+                                              'highPriorityTasks' => $highPriorityTasks,
+                                              'mediumPriorityTasks' => $mediumPriorityTasks,
+                                              'lowPriorityTasks' => $lowPriorityTasks,
+                                              'allTasks' => $allTasks,
+                                              'search' => $request->input('search'),
+                                              'status' => $request->input('status'),
+                                              'date_filter' => $request->input('date'),
+                                              'activePriority' => $activePriority
+                                          ]);
+                                      } catch (\Exception $e) {
+                                          return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+                                      }
+                                  }
                 public function updateTask(Request $request, Task $task)
     {
         try {
@@ -354,12 +432,7 @@ public function index(Request $request)
 
             $task = auth()->user()->tasks()->create($validated);
 
-          /*  return response()->json([
-                'success' => true,
-                'message' => 'Task created successfully.',
-                'data' => $task
-            ], 201);*/
-
+          
              // Return the newly created post using a resource
         return response()->json([
             'success' => true,

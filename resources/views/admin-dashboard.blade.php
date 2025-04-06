@@ -235,38 +235,48 @@
         </div>
         
         <div class="filter-section p-3 border-bottom bg-light">
-            <div class="search-wrapper mb-3">
-                <div class="input-group">
-                    <span class="input-group-text border-end-0 bg-white">
-                        <i class="fas fa-search text-primary"></i>
-                    </span>
-                    <input type="text" 
-                           class="form-control border-start-0 ps-0 task-search" 
-                           placeholder="Search tasks by title or description..."
-                           data-priority="high">
+            <form method="GET" action="{{ route('admin.tasks.index') }}" class="d-flex gap-2 flex-wrap">
+                <input type="hidden" name="priority" value="high">
+                <!-- Search input now inside the form -->
+                <div class="search-wrapper mb-3 w-100">
+                    <div class="input-group">
+                        <span class="input-group-text border-end-0 bg-white">
+                            <i class="fas fa-search text-primary"></i>
+                        </span>
+                        <input type="text"
+                                class="form-control border-start-0 ps-0"
+                                name="search"
+                               placeholder="Search tasks by title or description..."
+                                data-priority="high"
+                               value="{{ request('priority') == 'high' ? request('search') : '' }}">
+                    </div>
                 </div>
-            </div>
-        
-            <div class="d-flex gap-2 flex-wrap">
+                        
+                <!-- Filter Groups -->
                 <div class="filter-group">
-                    <select class="form-select form-select-sm status-filter" data-priority="high">
+                    <select class="form-select form-select-sm" name="status">
                         <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <select class="form-select form-select-sm date-filter" data-priority="high">
+                    <select class="form-select form-select-sm" name="date">
                         <option value="">All Dates</option>
-                        <option value="today">Due Today</option>
-                        <option value="tomorrow">Due Tomorrow</option>
-                        <option value="week">This Week</option>
-                        <option value="overdue">Overdue</option>
+                        <option value="today" {{ request('date') == 'today' ? 'selected' : '' }}>Due Today</option>
+                        <option value="tomorrow" {{ request('date') == 'tomorrow' ? 'selected' : '' }}>Due Tomorrow</option>
+                        <option value="week" {{ request('date') == 'week' ? 'selected' : '' }}>This Week</option>
+                        <option value="overdue" {{ request('date') == 'overdue' ? 'selected' : '' }}>Overdue</option>
                     </select>
                 </div>
-            </div>
+                                
+                @if(request()->hasAny(['search', 'status', 'date']) && request('priority') == 'high')
+                    <a href="{{ route('admin.tasks.index') }}" class="btn btn-sm btn-outline-danger">Clear Filters</a>
+                @endif
+            </form>
         </div>
+        
         <div class="card-body">
             @php
                 // For display in the list - paginated
@@ -741,24 +751,58 @@
              @empty
              <div class="empty-state text-center py-5">
                 <div class="empty-state-icon mb-4">
-                    <i class="fas fa-tasks text-info fa-3x mb-3 opacity-50"></i>
+                    <i class="fas fa-filter fa-3x text-info mb-3 opacity-75"></i>
                     <div class="empty-state-animation">
-                        <i class="fas fa-plus-circle text-primary fa-2x position-absolute" style="animation: pulse 2s infinite"></i>
+                        <i class="fas fa-search text-primary fa-2x position-absolute" style="animation: pulse 2s infinite"></i>
                     </div>
                 </div>
                 
-                <h5 class="empty-state-title mb-3 text-secondary">No High Priority Tasks Yet Is Created By User</h5>
+                <h5 class="empty-state-title mb-3 text-secondary">
+                    @if(request()->has('search') || request()->has('status') || request()->has('date'))
+                        No Matching High Priority Tasks Found
+                    @else
+                        No High Priority Tasks Created Yet
+                    @endif
+                </h5>
                 
                 <div class="empty-state-description mb-4">
-                    <p class="text-muted mb-1">This is where a High priority tasks will appear.</p>
-                    <p class="text-muted small">If it is created!</p>
+                    @if(request()->has('search'))
+                        <p class="text-muted mb-1">No tasks match your search for "<strong>{{ request('search') }}</strong>"</p>
+                    @elseif(request()->has('status'))
+                        <p class="text-muted mb-1">No tasks with <strong>{{ ucfirst(str_replace('_', ' ', request('status'))) }}</strong> status</p>
+                    @elseif(request()->has('date'))
+                        <p class="text-muted mb-1">
+                            No tasks 
+                            @switch(request('date'))
+                                @case('today') due today @break
+                                @case('tomorrow') due tomorrow @break
+                                @case('week') this week @break
+                                @case('overdue') that are overdue @break
+                            @endswitch
+                        </p>
+                    @else
+                        <p class="text-muted mb-1">This is where your High Priority tasks will appear.</p>
+                    @endif
+                    
+                    @unless(request()->hasAny(['search', 'status', 'date']))
+                        <p class="text-muted small">Create your first high priority task to get started!</p>
+                    @else
+                        <p class="text-muted small">Try adjusting your filters or search terms</p>
+                    @endunless
                 </div>
                 
-               
+                @if(request()->hasAny(['search', 'status', 'date']))
+                    <a href="{{ route('admin.tasks.index') }}?priority=high" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-times-circle me-1"></i> Clear Filters
+                    </a>
+                @endif
             </div>
              @endforelse
          </div>
      </div>
+    
+  {{--   {{ $tasks->appends(request()->except('page'))->links() }}  --}}
+     
  </div>
 
  <!-- Medium Priority Tasks -->
@@ -780,7 +824,8 @@
                     <input type="text" 
                            class="form-control border-start-0 ps-0 task-search" 
                            placeholder="Search tasks by title or description..."
-                           data-priority="medium">
+                           data-priority="medium"
+                           value="{{ request('priority') == 'medium' ? request('search') : '' }}">
                 </div>
             </div>
         
@@ -802,6 +847,9 @@
                         <option value="overdue">Overdue</option>
                     </select>
                 </div>
+                @if(request()->hasAny(['search', 'status', 'date']) && request('priority') == 'medium')
+                <a href="{{ route('admin.tasks.index') }}" class="btn btn-sm btn-outline-danger">Clear Filters</a>
+            @endif
             </div>
         </div>
         <div class="card-body">
@@ -1270,20 +1318,51 @@
              @empty
              <div class="empty-state text-center py-5">
                 <div class="empty-state-icon mb-4">
-                    <i class="fas fa-tasks text-info fa-3x mb-3 opacity-50"></i>
+                    <i class="fas fa-filter fa-3x text-info mb-3 opacity-75"></i>
                     <div class="empty-state-animation">
-                        <i class="fas fa-plus-circle text-primary fa-2x position-absolute" style="animation: pulse 2s infinite"></i>
+                        <i class="fas fa-search text-primary fa-2x position-absolute" style="animation: pulse 2s infinite"></i>
                     </div>
                 </div>
                 
-                <h5 class="empty-state-title mb-3 text-secondary">No Medium Priority Tasks Yet Is Created By User</h5>
+                <h5 class="empty-state-title mb-3 text-secondary">
+                    @if(request()->has('search') || request()->has('status') || request()->has('date'))
+                        No Matching Medium Priority Tasks Found
+                    @else
+                        No Medium Priority Tasks Created Yet
+                    @endif
+                </h5>
                 
                 <div class="empty-state-description mb-4">
-                    <p class="text-muted mb-1">This is where a Medium priority tasks will appear.</p>
-                    <p class="text-muted small">If it is created!</p>
+                    @if(request()->has('search'))
+                        <p class="text-muted mb-1">No tasks match your search for "<strong>{{ request('search') }}</strong>"</p>
+                    @elseif(request()->has('status'))
+                        <p class="text-muted mb-1">No tasks with <strong>{{ ucfirst(str_replace('_', ' ', request('status'))) }}</strong> status</p>
+                    @elseif(request()->has('date'))
+                        <p class="text-muted mb-1">
+                            No tasks 
+                            @switch(request('date'))
+                                @case('today') due today @break
+                                @case('tomorrow') due tomorrow @break
+                                @case('week') this week @break
+                                @case('overdue') that are overdue @break
+                            @endswitch
+                        </p>
+                    @else
+                        <p class="text-muted mb-1">This is where your Medium Priority tasks will appear.</p>
+                    @endif
+                    
+                    @unless(request()->hasAny(['search', 'status', 'date']))
+                        <p class="text-muted small">Create your first medium priority task to get started!</p>
+                    @else
+                        <p class="text-muted small">Try adjusting your filters or search terms</p>
+                    @endunless
                 </div>
                 
-               
+                @if(request()->hasAny(['search', 'status', 'date']))
+                    <a href="{{ route('admin.tasks.index') }}?priority=medium" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-times-circle me-1"></i> Clear Filters
+                    </a>
+                @endif
             </div>
              @endforelse
          </div>
@@ -1308,7 +1387,8 @@
                     <input type="text" 
                            class="form-control border-start-0 ps-0 task-search" 
                            placeholder="Search tasks by title or description..."
-                           data-priority="low">
+                           data-priority="low"
+                           value="{{ request('priority') == 'low' ? request('search') : '' }}">
                 </div>
             </div>
         
@@ -1329,9 +1409,15 @@
                         <option value="week">This Week</option>
                         <option value="overdue">Overdue</option>
                     </select>
+                   
                 </div>
+                @if(request()->hasAny(['search', 'status', 'date']) && request('priority') == 'low')
+                <a href="{{ route('admin.tasks.index') }}" class="btn btn-sm btn-outline-danger">Clear Filters</a>
+            @endif
             </div>
+          
         </div>
+       
         <div class="card-body">
             @php
                 // For display in the list - paginated
@@ -1801,20 +1887,51 @@
              @empty
              <div class="empty-state text-center py-5">
                 <div class="empty-state-icon mb-4">
-                    <i class="fas fa-tasks text-info fa-3x mb-3 opacity-50"></i>
+                    <i class="fas fa-filter fa-3x text-info mb-3 opacity-75"></i>
                     <div class="empty-state-animation">
-                        <i class="fas fa-plus-circle text-primary fa-2x position-absolute" style="animation: pulse 2s infinite"></i>
+                        <i class="fas fa-search text-primary fa-2x position-absolute" style="animation: pulse 2s infinite"></i>
                     </div>
                 </div>
                 
-                <h5 class="empty-state-title mb-3 text-secondary">No Low Priority Tasks Yet Is Created By User</h5>
+                <h5 class="empty-state-title mb-3 text-secondary">
+                    @if(request()->has('search') || request()->has('status') || request()->has('date'))
+                        No Matching Low Priority Tasks Found
+                    @else
+                        No Low Priority Tasks Created Yet
+                    @endif
+                </h5>
                 
                 <div class="empty-state-description mb-4">
-                    <p class="text-muted mb-1">This is where a Low priority tasks will appear.</p>
-                    <p class="text-muted small">If it is created!</p>
+                    @if(request()->has('search'))
+                        <p class="text-muted mb-1">No tasks match your search for "<strong>{{ request('search') }}</strong>"</p>
+                    @elseif(request()->has('status'))
+                        <p class="text-muted mb-1">No tasks with <strong>{{ ucfirst(str_replace('_', ' ', request('status'))) }}</strong> status</p>
+                    @elseif(request()->has('date'))
+                        <p class="text-muted mb-1">
+                            No tasks 
+                            @switch(request('date'))
+                                @case('today') due today @break
+                                @case('tomorrow') due tomorrow @break
+                                @case('week') this week @break
+                                @case('overdue') that are overdue @break
+                            @endswitch
+                        </p>
+                    @else
+                        <p class="text-muted mb-1">This is where your Low Priority tasks will appear.</p>
+                    @endif
+                    
+                    @unless(request()->hasAny(['search', 'status', 'date']))
+                        <p class="text-muted small">Create your first low priority task to get started!</p>
+                    @else
+                        <p class="text-muted small">Try adjusting your filters or search terms</p>
+                    @endunless
                 </div>
                 
-               
+                @if(request()->hasAny(['search', 'status', 'date']))
+                    <a href="{{ route('admin.tasks.index') }}?priority=low" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-times-circle me-1"></i> Clear Filters
+                    </a>
+                @endif
             </div>
              @endforelse
          </div>
@@ -1827,7 +1944,9 @@
 <div class="d-flex justify-content-end mt-4">
  <nav>
      <ul class="pagination pagination-rounded">
-         {{ $tasks->links() }}
+     
+        {{ $tasks->appends(request()->except('page'))->links() }}
+
      </ul>
  </nav>
 </div>

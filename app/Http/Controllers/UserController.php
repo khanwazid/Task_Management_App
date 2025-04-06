@@ -188,7 +188,7 @@ public function login(Request $request)
             \Log::info('User logged in successfully', ['user_id' => Auth::id()]);
 
             return ($user->role === 'admin')
-                ? redirect()->route('admin-dashboard')->with('success', 'Welcome back, ' . $user->name . '!')
+                ? redirect()->route('admin.tasks.index')->with('success', 'Welcome back, ' . $user->name . '!')
                 : redirect()->route('dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
         }
 

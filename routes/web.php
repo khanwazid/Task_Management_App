@@ -75,7 +75,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
  Route::put('/admin/profile/update', [UserController::class, 'updates'])->name('profile.updates');
  Route::put('/admin/profile/password', [UserController::class, 'updatePasswords'])->name('password.updates');
  Route::post('/admin-validate-current-password', [UserController::class, 'validateCurrentPasswords']);
- Route::get('/admin/dashboard', [TaskController::class, 'indexs'])->name('admin-dashboard');
+ //Route::get('/admin/dashboard', [TaskController::class, 'indexs'])->name('admin-dashboard');
 
 
 
@@ -87,7 +87,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
  Route::put('/admin/tasks/notes/{note}', [TaskNoteController::class, 'updates'])->name('admin.note.update');
 
 
-Route::get('/admin/tasks', [TaskController::class, 'indexs'])->name('admin.tasks.index');
+Route::get('/admin/tasks/dashboardss', [TaskController::class, 'indexs'])->name('admin.tasks.index');
  Route::put('/admin/tasks/{task}', [TaskController::class, 'updates'])->name('admin.tasks.update');
  Route::get('/admin/tasks/{task}', [TaskController::class, 'show'])->name('admin.tasks.show');
  Route::delete('/admin/tasks/{task}', [TaskController::class, 'destroys'])->name('admin.tasks.destroy');

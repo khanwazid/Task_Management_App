@@ -114,28 +114,75 @@ public function destroy(Task $task)
 
 
                   //Admin Section
+                  public function indexs(Request $request)
+                  {
+                      try {
+                          if (auth()->user()->role !== 'admin') {
+                              return redirect()->back()->with('error', 'You do not have permission to view all tasks.');
+                          }
                   
-public function indexs()
-{
-    try {
-        // Check if the user is an admin
-        if (auth()->user()->role !== 'admin') {
-            return redirect()->back()->with('error', 'You do not have permission to view all tasks.');
+                          $query = Task::query();
+                          // Priority filter
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->input('priority'));
         }
+    
 
-        // Fetch tasks for all users and paginate the results
-        $tasks = Task::latest()->paginate(20);
-
-        // Fetch all tasks for accurate statistics (not paginated)
-        $allTasks = Task::all();
-        return view('admin-dashboard', compact('tasks', 'allTasks'));
-
-       // return view('admin-dashboard', compact('tasks'));
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Something went wrong. Please try again.');
-    }
-
-}
+                          // Search filter
+                          if ($request->filled('search')) {
+                              $searchTerm = $request->input('search');
+                              $query->where(function ($q) use ($searchTerm) {
+                                  $q->where('title', 'like', '%' . $searchTerm . '%')
+                                    ->orWhere('description', 'like', '%' . $searchTerm . '%');
+                              });
+                          }
+                  
+                          // Status filter
+                          if ($request->filled('status')) {
+                              $query->where('status', $request->input('status'));
+                          }
+                  
+                          // Date filter
+                          if ($request->filled('date')) {
+                              $dateFilter = $request->input('date');
+                              $today = now()->startOfDay();
+                              $tomorrow = now()->addDay()->startOfDay();
+                              $weekStart = now()->startOfWeek();
+                              $weekEnd = now()->endOfWeek();
+                  
+                              switch ($dateFilter) {
+                                  case 'today':
+                                      $query->whereDate('due_date', '=', $today);
+                                      break;
+                                  case 'tomorrow':
+                                      $query->whereDate('due_date', '=', $tomorrow);
+                                      break;
+                                  case 'week':
+                                      $query->whereBetween('due_date', [$weekStart, $weekEnd]);
+                                      break;
+                                  case 'overdue':
+                                      $query->whereDate('due_date', '<', $today)
+                                            ->where('status', '!=', 'completed');
+                                      break;
+                              }
+                          }
+                  
+                          $tasks = $query->latest()->paginate(20);
+                          $allTasks = Task::all(); // For statistics
+                  
+                          return view('admin-dashboard', [
+                              'tasks' => $tasks,
+                              'allTasks' => $allTasks,
+                              'search' => $request->input('search'),
+                              'status' => $request->input('status'),
+                              'date_filter' => $request->input('date'),
+                              'priority' => $request->input('priority')
+                          ]);
+                  
+                      } catch (\Exception $e) {
+                          return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+                      }
+                  }
 public function updates(Request $request, Task $task)
 {
     try {
